@@ -1,0 +1,472 @@
+unit FMain;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ExtCtrls, StdCtrls, Buttons, ComCtrls, OleCtrls, SHDocVw,
+  Generics.Collections, uPriceInfo;
+
+
+const
+  USER_RECEIVECAPINFO = WM_USER + 1;
+
+type
+  TF_Main = class(TForm)
+    Label1: TLabel;
+    Label2: TLabel;
+    lbLocalTime: TLabel;
+    lbServerTime: TLabel;
+    Timer1: TTimer;
+    Label3: TLabel;
+    etFilter: TEdit;
+    Label5: TLabel;
+    etCurPrice: TEdit;
+    Label7: TLabel;
+    lbFirstBidCount: TLabel;
+    lbCustomer: TLabel;
+    Label10: TLabel;
+    lbCarCount: TLabel;
+    Label12: TLabel;
+    lbSecondBidCount: TLabel;
+    Label14: TLabel;
+    Label15: TLabel;
+    etCurQLen: TEdit;
+    etNewBidCount: TEdit;
+    btCapPacket: TBitBtn;
+    BitBtn2: TBitBtn;
+    ckTop: TCheckBox;
+    ckP: TCheckBox;
+    ckCapAll: TCheckBox;
+    btnOpDeclare: TBitBtn;
+    grpManualStrategy: TGroupBox;
+    Label8: TLabel;
+    lblWaitTime: TLabel;
+    Timer2: TTimer;
+    Button1: TButton;
+    lblBlock: TLabel;
+    lblAcceptPrice: TLabel;
+    lbl1: TLabel;
+    lblBidTime: TLabel;
+    Button2: TButton;
+    PageControl1: TPageControl;
+    拍牌信息: TTabSheet;
+    TabSheet1: TTabSheet;
+    procedure Timer1Timer(Sender: TObject);
+    procedure btCapPacketClick(Sender: TObject);
+    procedure BitBtn2Click(Sender: TObject);
+    procedure ckTopClick(Sender: TObject);
+    procedure btnOpDeclareClick(Sender: TObject);
+    procedure Timer2Timer(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+  private
+    FHotKeyDict: TDictionary<Integer, TButton>;
+    FLastBidTime: TDateTime;{ TODO : 以后做成配置 }
+    procedure StartCap();
+    procedure InitStrategy;
+    procedure UpdatePriceInfo(APrice: TPriceInfo);
+    procedure DoOnStrategyClick(Sender: TObject);
+    procedure DoOnHotKeyEvent(AKey: Cardinal; var AHandle: Boolean);
+  protected
+    procedure CreateHandle; override;
+    procedure WM_USERRECEIVECAPINFO(var Message: TMessage); message USER_RECEIVECAPINFO;
+
+  public
+    procedure AnalyzePacket(strData:string);
+    procedure AfterConstruction; override;
+    procedure BeforeDestruction; override;
+  end;
+
+var
+  F_Main: TF_Main;
+
+implementation
+uses
+  FCapInfo, ufrmOpDeclare, uStrategy, uKeyHook, uHelp, USetting, DateUtils,
+  uTestData, SyncObjs;
+
+{$R *.dfm}
+
+var
+  CriticalSection: TCriticalSection;
+  G_CapInfo: string;
+  G_Handle: THandle = 0;
+
+//type
+//  TErrorCallback = procedure(errInfo :PAnsiChar);stdcall;
+//  TCapPriceCallback = procedure(priceStr:PAnsiChar;strLen:integer);stdcall;
+//  TDebugInfoCallback = procedure(debugInfo:PAnsiChar);stdcall;
+
+
+  function startNicCap(filter:PAnsiChar;isSelfOnly:boolean;interval:integer;capAll:integer;
+    capCallback:pointer;errCallback:pointer):integer;stdcall;external 'PPPriceDetect.dll';
+
+
+//  function dllCallTest(inputInfo:PAnsiChar):integer;stdcall;external 'PPPriceDetect.dll';
+
+//  procedure regDebugCallback(debugCallback:pointer);stdcall;external 'PPPriceDetect.dll';
+
+//  function stopNicStat(errCallback:pointer):boolean;stdcall;external 'PPPriceDetect.dll';
+
+  procedure initWinSocket();stdcall;external 'PPPriceDetect.dll';
+
+
+
+//    function startNicCap(filter:PChar;isSelfOnly:boolean;interval:integer;capAll:integer;
+//    capCallback:pointer;errCallback:pointer):integer;stdcall;external 'PPPriceDetect.dll';
+//
+//
+//  function dllCallTest(inputInfo:pchar):integer;stdcall;external 'PPPriceDetect.dll';
+//
+//  procedure regDebugCallback(debugCallback:pointer);stdcall;external 'PPPriceDetect.dll';
+//
+////  function stopNicStat(errCallback:pointer):boolean;stdcall;external 'PPPriceDetect.dll';
+//
+//  procedure initWinSocket();stdcall;external 'PPPriceDetect.dll';
+
+function UTF8ToWide(const US: UTF8String): WideString;
+var
+  len: integer;
+  ws: WideString;
+begin
+  Result:='';
+  if (Length(US) = 0) then  exit;
+  len:=MultiByteToWideChar(CP_UTF8, 0, PAnsiChar(US), -1, nil, 0);
+  SetLength(ws, len);
+  MultiByteToWideChar(CP_UTF8, 0, PAnsiChar(US), -1, PWideChar(ws), len);
+  Result:=ws;
+end;
+
+function WideToAnsi(const WS: WideString): AnsiString;
+var
+  len: integer;
+  s: AnsiString;
+begin
+  Result:='';
+  if (Length(WS) = 0) then exit;
+  len:=WideCharToMultiByte(CP_ACP, 0, PWideChar(WS), -1, nil, 0, nil, nil);
+  SetLength(s, len);
+  WideCharToMultiByte(CP_ACP, 0, PWideChar(WS), -1, PAnsiChar(s), len, nil, nil);
+  Result:=s;
+end;
+
+function UTF8ToAnsi(const S: UTF8String): AnsiString;
+begin
+  Result:=WideToAnsi(UTF8ToWide(S));
+end;
+
+procedure capCallback(priceStr:PAnsiChar; strLen:integer);stdcall;
+var
+  pp : AnsiString;
+  tempStr : UTF8String;
+begin
+  SetLength(tempStr,strLen+1);
+  strlcopy(PAnsiChar(tempStr),PAnsiChar(priceStr),strlen);
+//  tempStr := priceStr;
+  pp := UTF8ToAnsi(tempStr);
+
+  CriticalSection.Enter;
+  G_CapInfo := string(pp);
+  CriticalSection.Leave;
+  PostMessage(G_Handle, USER_RECEIVECAPINFO, 0, 0);
+end;
+
+procedure errorCallback(errInfo:PansiChar);stdcall;
+begin
+//  F_Main.mmLog.Lines.Add(errInfo);
+end;
+
+procedure TF_Main.StartCap;
+var
+  liCapAll : integer;
+begin
+  if  self.ckCapAll.checked then begin
+    liCapAll :=1;
+  end else begin
+    liCapAll :=0;
+  end;
+  startNicCap(PAnsiChar(AnsiString(Trim(etFilter.Text))),ckP.Checked,1,liCapAll,@capCallback,@capCallback);
+  btCapPacket.Enabled := false;
+end;
+
+procedure TF_Main.Timer1Timer(Sender: TObject);
+begin
+  lbLocalTime.Caption := TimeToStr(time);
+end;
+
+
+procedure TF_Main.Timer2Timer(Sender: TObject);
+var
+  LString: string;
+begin
+  LString := GetTestData;
+  if Length(LString) <> 0 then
+  begin
+    CriticalSection.Enter;
+    G_CapInfo := LString;
+    CriticalSection.Leave;
+    PostMessage(G_Handle, USER_RECEIVECAPINFO, 0, 0);
+  end;
+end;
+
+procedure TF_Main.UpdatePriceInfo(APrice: TPriceInfo);
+var
+  LCalcWaitTime: Double;
+  LTime: TDateTime;
+begin
+  try
+    lbServerTime.Caption := FormatDateTime('hh:mm:ss', APrice.ServerTime);
+
+    if APrice.BidStage in [bsFirst, bsSecond] then
+    begin
+      lbCarCount.Caption := IntToStr(APrice.LicenseCount);
+      lbCustomer.Caption := '投标人数：'+inttostr(APrice.TotalBidderCount);
+      etCurPrice.Text := IntToStr(APrice.DisplayPrice);
+      etCurQLen.Text := IntToStr(APrice.UnprocessCount);
+
+      lbSecondBidCount.Caption := inttostr(g_PriceInfoManager.SecondBidCount);
+      lbFirstBidCount.Caption := inttostr(g_PriceInfoManager.FirstBidCount);
+      etNewBidCount.Text := IntToStr(g_PriceInfoManager.NewBidCount);
+//      lbCalcTime.Caption := TimeToStr(APrice.DisplayTime);
+      LCalcWaitTime := (g_PriceInfoManager.CalcWaitTime);
+      if LCalcWaitTime < 0 then
+        lblWaitTime.Caption := 'N/A'
+      else
+        lblWaitTime.Caption := FormatFloat('0.00', LCalcWaitTime);
+      lblBlock.Visible := g_PriceInfoManager.IsBlock;
+      lblAcceptPrice.Visible := g_PriceInfoManager.IsAcceptPrice;
+
+
+      LTime := IncSecond(APrice.ServerTime, Round(LCalcWaitTime));
+      lblBidTime.Caption := FormatDateTime('hh:mm:ss', LTime);
+
+
+      if LTime >= FLastBidTime then
+      begin
+        lblBidTime.Font.Color := clRed;
+        lblBidTime.Font.Style := lblBidTime.Font.Style + [fsBold];
+      end;
+//      F_CapInfo.AppendExtInfo(lbServerTime.Caption + '------' + lblBidTime.Caption);
+    end;
+  Except
+  end;
+end;
+
+procedure TF_Main.WM_USERRECEIVECAPINFO(var Message: TMessage);
+var
+  LStr: string;
+begin
+  CriticalSection.Enter;
+  LStr := G_CapInfo;
+  G_CapInfo := '';
+  CriticalSection.Leave;
+  if Length(LStr) > 0 then
+    AnalyzePacket(LStr);
+end;
+
+procedure TF_Main.btCapPacketClick(Sender: TObject);
+begin
+  StartCap();
+end;
+
+procedure TF_Main.btnOpDeclareClick(Sender: TObject);
+var
+  Lfrm: TfrmOpDeclare;
+begin
+  Lfrm := TfrmOpDeclare.Create(nil);
+  Lfrm.ShowModal;
+  Lfrm.Free;
+end;
+
+procedure TF_Main.Button1Click(Sender: TObject);
+begin
+  Timer2.Enabled := True;
+end;
+
+
+
+procedure SendTestData;
+var
+  LString: string;
+begin
+  while True do
+  begin
+    LString := GetTestData;
+    if Length(LString) <> 0 then
+    begin
+      CriticalSection.Enter;
+      G_CapInfo := LString;
+      CriticalSection.Leave;
+      PostMessage(G_Handle, USER_RECEIVECAPINFO, 0, 0);
+    end;
+    Sleep(1000);
+  end;
+end;
+
+
+procedure TF_Main.Button2Click(Sender: TObject);
+var
+  LID: THandle;
+begin
+  CreateThread(nil, 0, @SendTestData, nil, 0, LID);
+end;
+
+procedure TF_Main.BeforeDestruction;
+begin
+  inherited;
+
+  DetachEvent;
+  FHotKeyDict.Free;
+end;
+
+procedure TF_Main.BitBtn2Click(Sender: TObject);
+begin
+  F_CapInfo.Show();
+end;
+
+
+
+procedure TF_Main.AfterConstruction;
+begin
+  inherited;
+  FHotKeyDict := TDictionary<Integer, TButton>.Create;
+
+  FLastBidTime := EncodeDateTime(
+            YearOf(Now),
+            MonthOf(Now),
+            DayOf(Now),
+            11,
+            29,
+            57,
+            0);
+
+  Timer1.Enabled := true;
+  initWinSocket();
+  self.Top := 0;
+  self.Left := 0;
+  InitStrategy;
+
+  AttachEvent(DoOnHotKeyEvent);
+end;
+
+procedure TF_Main.AnalyzePacket(strData: string);
+var
+  strList : TStrings;
+  LPriceInfo: TPriceInfo;
+begin
+  Application.ProcessMessages();
+  strList := TStringList.Create();
+  try
+    ExtractStrings([','],[' ','#'],PChar(strData), strList);
+    LPriceInfo := TPriceInfo.Create(strData);
+    g_PriceInfoManager.Add(LPriceInfo);
+    UpdatePriceInfo(LPriceInfo);
+    F_CapInfo.AppendExtInfo(strData);
+  finally
+    strList.Free;
+  end;
+end;
+
+procedure TF_Main.ckTopClick(Sender: TObject);
+begin
+  if ckTop.Checked then begin
+     self.FormStyle := fsStayOnTop;
+  end else begin
+     self.FormStyle := fsNormal;
+  end;
+end;
+
+procedure TF_Main.CreateHandle;
+begin
+  inherited;
+  G_Handle := Self.Handle;
+end;
+
+procedure TF_Main.DoOnHotKeyEvent(AKey: Cardinal; var AHandle: Boolean);
+var
+  LButton: TButton;
+begin
+  if GetKeyState(VK_CONTROL) < 0 then
+  begin
+    case AKey of
+      VK_RETURN: //Ctrl+Enter提交验证码
+        begin
+          MouseClick(g_ScreanPointSetting.GetSubmitPos);
+          AHandle := True;
+        end;
+      96..105:  //Ctrl+小键盘0-9
+        begin
+          if FHotKeyDict.ContainsKey(AKey-96) then
+          begin
+            LButton := FHotKeyDict.Items[AKey-96];
+            if Assigned(LButton) then
+            begin
+              g_StrategyManager.InvokeStrategy(g_StrategyManager[LButton.Tag]);
+              AHandle := True;
+            end;
+          end;
+        end;
+    end;
+  end;
+end;
+
+procedure TF_Main.DoOnStrategyClick(Sender: TObject);
+var
+  LButton: TButton;
+begin
+  LButton := TButton(Sender);
+  g_StrategyManager.InvokeStrategy(g_StrategyManager[LButton.Tag]);
+end;
+
+procedure TF_Main.InitStrategy;
+const
+  Button_Indent = 15;
+var
+  I: Integer;
+  LButton: TButton;
+  LManual: TManualStrategy;
+  LAutomatic: TAutomaticStrategy;
+  LLeft: Integer;
+  LTop: Integer;
+  LAutoInvokeThread: TAutoInvokeThread;
+begin
+  LLeft := Button_Indent;
+  LTop := (grpManualStrategy.Height - 25) div 2;
+  //手动策略加按钮
+  for I := 0 to g_StrategyManager.Count - 1 do
+  begin
+    case g_StrategyManager[I].Type_ of
+      stAutomatic:
+        begin
+          LAutoInvokeThread := TAutoInvokeThread.Create(False);
+          LAutoInvokeThread.Strategy := TAutomaticStrategy(g_StrategyManager[I]);
+          LAutoInvokeThread.Resume;
+        end;
+      stManual:
+        begin
+          LManual := TManualStrategy(g_StrategyManager[I]);
+          LButton := TButton.Create(Self);
+          LButton.Parent := grpManualStrategy;
+          LButton.Caption := LManual.Caption;
+          LButton.OnClick := DoOnStrategyClick;
+          LButton.Tag := I;
+          LButton.Left := LLeft;
+          LButton.Top := LTop;
+          LLeft := LLeft + LButton.Width + Button_Indent;
+          FHotKeyDict.Add(LManual.HotKey, LButton);
+        end;
+    end;
+  end;
+  grpManualStrategy.Width := LLeft;
+end;
+
+
+
+initialization;
+  CriticalSection := TCriticalSection.Create;
+
+finalization
+  CriticalSection.Free;
+
+end.

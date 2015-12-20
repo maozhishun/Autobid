@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2015/03/18 14:30:05.000.686,=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2015/05/14 15:01:09.000.488,=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2015/05/27 15:45:29.000.931,=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2015/06/29 16:13:59.000.165,=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2015/07/14 15:36:55.000.195,=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2015/07/14 17:07:57.000.442,=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit2.pas</Transaction>
+    <Transaction>2015/07/14 17:08:35.000.992,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\FakeClient\Unit2.dfm=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit2.dfm</Transaction>
+    <Transaction>2015/07/14 17:08:35.000.992,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\FakeClient\Unit2.pas=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit2.pas</Transaction>
+    <Transaction>2015/07/14 17:08:37.000.565,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\FakeClient\Unit1.pas=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2015/07/14 17:08:37.000.565,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\FakeClient\Unit1.dfm=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit1.dfm</Transaction>
+    <Transaction>2015/07/14 17:08:38.000.925,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\FakeClient\Project1.dproj=C:\Users\zsmao\Documents\RAD Studio\Projects\Project1.dproj</Transaction>
+    <Transaction>2015/10/19 15:55:24.000.501,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\FakeClient\FakeCilent.dproj=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\FakeClient\Project1.dproj</Transaction>
+  </Transactions>
+</BorlandProject>

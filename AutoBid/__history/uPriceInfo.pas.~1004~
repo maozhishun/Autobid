@@ -1,0 +1,1064 @@
+unit uPriceInfo;
+
+interface
+
+uses
+  Classes, SysUtils, Windows, Generics.Collections;
+
+type
+  THackIndex = class
+  private
+    FInfoLength: Integer;
+    FTimeIndex: TList<Integer>;
+    FPriceIndex: TList<Integer>;
+    FInfos: TStringList;
+    FServerTimeSecondIndex: Integer;
+    FDisplayTimeSecondIndex: Integer;
+    FPriceHundredIndex: Integer;
+    FPriceThousandsIndex: Integer;
+    FPriceThousandsValue: Integer;
+    FPriceHundredValue: Integer;
+    FFileName: string;
+    FPriceChanged: Boolean;
+    procedure SetServerTimeSecondIndex(const Value: Integer);
+    procedure SetDisplayTimeSecondIndex(const Value: Integer);
+
+    procedure ReadPrice;
+    procedure HackHundred;
+    procedure HackThousands;
+    procedure HackPrice;
+    procedure HackTime;
+    function IsIncChar(AChar,AChar2: Char): Boolean;
+    procedure SetPriceThousandsValue(const Value: Integer);
+    procedure SetPriceHundredValue(const Value: Integer);
+    procedure SetPriceChanged(const Value: Boolean);
+  public
+    procedure AddInfo(AInfo: string);
+    procedure ReHack;
+    function IsHackTime: Boolean;
+    function IsHackPrice: Boolean;
+    function IsHackHundred: Boolean;
+
+    procedure RefreshInfo(AInfos: TStrings);
+
+
+    procedure LoadFromFile;
+    procedure SaveToFile;
+
+    procedure AfterConstruction; override;
+    procedure BeforeDestruction; override;
+    property ServerTimeSecondIndex: Integer read FServerTimeSecondIndex write SetServerTimeSecondIndex;
+    property DisplayTimeSecondIndex: Integer read FDisplayTimeSecondIndex write SetDisplayTimeSecondIndex;
+    property PriceHundredValue: Integer read FPriceHundredValue write SetPriceHundredValue;
+    property PriceThousandsValue: Integer read FPriceThousandsValue write SetPriceThousandsValue;
+    property PriceChanged: Boolean read FPriceChanged write SetPriceChanged;
+  end;
+
+  TBidStage = (bsFirst, bsSecond, bsOutTime);
+
+  TPriceInfo = class
+  private
+    FTotalBid: Integer;
+    FUnprocessCount: Integer;
+    FTimeInfo: string;
+    FDisplayPrice: Integer;
+    FBidStage: TBidStage;
+    FLicenseCount: Integer;
+    FDisplayTime: TDateTime;
+    FTotalBidderCount: Integer;
+    FServerTime: TDateTime;
+    FLocalTime: TDateTime;
+    procedure SetBidStage(const Value: TBidStage);
+    procedure SetDisplayPrice(const Value: Integer);
+    procedure SetDisplayTime(const Value: TDateTime);
+    procedure SetLicenseCount(const Value: Integer);
+    procedure SetTimeInfo(const Value: string);
+    procedure SetTotalBid(const Value: Integer);
+    procedure SetTotalBidderCount(const Value: Integer);
+    procedure SetUnprocessCount(const Value: Integer);
+    procedure SetServerTime(const Value: TDateTime);
+    procedure SetLocalTime(const Value: TDateTime);
+  public
+    function Clone: TPriceInfo;
+    property TimeInfo: string read FTimeInfo write SetTimeInfo;
+    property ServerTime: TDateTime read FServerTime write SetServerTime;
+    property BidStage: TBidStage read FBidStage write SetBidStage;
+    property LicenseCount: Integer read FLicenseCount write SetLicenseCount;
+    property TotalBidderCount: Integer read FTotalBidderCount write SetTotalBidderCount;
+    property DisplayTime: TDateTime read FDisplayTime write SetDisplayTime;
+    property DisplayPrice: Integer read FDisplayPrice write SetDisplayPrice;
+    property TotalBid: Integer read FTotalBid write SetTotalBid;
+    property UnprocessCount: Integer read FUnprocessCount write SetUnprocessCount;
+    property LocalTime: TDateTime read FLocalTime write SetLocalTime;
+  public
+    constructor Create(const AContent: string); reintroduce;
+  end;
+
+  TPriceInfoManager = class(TList<TPriceInfo>)
+  private
+    FHackIndex: THackIndex;
+    FFileName: string;
+    FServerTimeDelta: Double;
+    FBidPrice: Integer;
+    FFirstBidCount: Integer;
+    FManualThousands: Integer;
+    function GetLastPrice: Integer;
+    function GetFirstBidCount: Integer;
+    function GetNewBidCount: Integer;
+    function GetSecondBidCount: Integer;
+    function GetLastItem: TPriceInfo;
+    function GetCalcWaitTime: Double;
+    function GetIsBlock: Boolean;
+    function GetIsAcceptPrice: Boolean;
+    function GetLastServerTime: TDateTime;
+
+    procedure SaveServerTimeDelta;
+    procedure LoadServerTimeDelta;
+    function GetLastSmartAdjustPrice: Integer;
+    procedure SetManualThousands(const Value: Integer);
+
+  public
+    function Add(const Value: TPriceInfo): Integer;
+    procedure SyncServerTimeDelta;
+    procedure SetBidPrice(APrice: Integer);
+
+    function BuildPriceInfo(const ARandomString: string): TPriceInfo;
+
+    procedure AfterConstruction; override;
+    procedure BeforeDestruction; override;
+    property LastPrice: Integer read GetLastPrice;
+    property LastSmartAdjustPrice: Integer read GetLastSmartAdjustPrice;
+    property LastServerTime: TDateTime read GetLastServerTime;
+    property NewBidCount: Integer read GetNewBidCount;
+    property FirstBidCount: Integer read GetFirstBidCount;
+    property SecondBidCount: Integer read GetSecondBidCount;
+    property CalcWaitTime: Double read GetCalcWaitTime;
+    property IsBlock: Boolean read GetIsBlock;
+    property IsAcceptPrice: Boolean read GetIsAcceptPrice;
+    property ServerTimeDelta: Double read FServerTimeDelta;
+    property HackIndex: THackIndex read FHackIndex;
+    property ManualThousands: Integer read FManualThousands write SetManualThousands;
+  end;
+
+
+
+var
+  g_PriceInfoManager: TPriceInfoManager;
+
+implementation
+
+uses
+  DateUtils, FCapInfo, System.IniFiles, Vcl.Forms, Vcl.Dialogs;
+
+const
+  CalcCount = 3;
+
+{ TPriceInfo }
+
+function TPriceInfo.Clone: TPriceInfo;
+begin
+  Result := TPriceInfo.Create('');
+  Result.TimeInfo := TimeInfo;
+  Result.ServerTime := ServerTime;
+  Result.BidStage := BidStage;
+  Result.LicenseCount := LicenseCount;
+  Result.TotalBidderCount := TotalBidderCount;
+  Result.DisplayTime := DisplayTime;
+  Result.DisplayPrice := DisplayPrice;
+  Result.TotalBid := TotalBid;
+  Result.UnprocessCount := UnprocessCount;
+end;
+
+constructor TPriceInfo.Create(const AContent: string);
+var
+  LStrings: TStringList;
+begin
+  FLocalTime := Now;
+
+  //AContent := '20150627112941,B,2015年6月27日上海市个人非营业性客车额度投标拍卖会,7441,172205,10:30,11:30,10:30,11:00,11:00,11:30,11:29:40,79100,2015-06-27 11:29:36,78800,79400,504748,0';
+  LStrings := TStringList.Create;
+  LStrings.CommaText := AContent;
+  if LStrings.Count > 2 then
+  begin
+    { TODO : 测试时，用当天时间 }
+    {FServerTime :=
+       EncodeDateTime(
+                  StrToInt(Copy(LStrings[0],1,4)),
+                  StrToInt(Copy(LStrings[0],5,2)),
+                  StrToInt(Copy(LStrings[0],7,2)),
+                  StrToInt(Copy(LStrings[0],9,2)),
+                  StrToInt(Copy(LStrings[0],11,2)),
+                  StrToInt(Copy(LStrings[0],13,2)),
+                  0);
+    }
+    FServerTime :=
+       EncodeDateTime(
+                  YearOf(Now),
+                  MonthOf(Now),
+                  DayOf(Now),
+                  StrToInt(Copy(LStrings[0],9,2)),
+                  StrToInt(Copy(LStrings[0],11,2)),
+                  StrToInt(Copy(LStrings[0],13,2)),
+                  0);
+
+
+    if LStrings[1] = 'A' then
+      FBidStage := bsFirst
+    else if LStrings[1] = 'B' then
+      FBidStage := bsSecond
+    else if LStrings[1] = 'C' then
+      FBidStage := bsOutTime;
+
+    case FBidStage of
+      bsFirst:
+        begin
+          if LStrings.Count = 20 then
+          begin
+            FTimeInfo := LStrings[0];
+            FTotalBid := StrToInt(LStrings[18]);;
+            FUnprocessCount := StrToInt(LStrings[19]);
+            FDisplayPrice := StrToInt(LStrings[15]);
+            FLicenseCount := StrToInt(LStrings[4]);
+            FDisplayTime :=
+            EncodeDateTime(
+                  YearOf(Now),
+                  MonthOf(Now),
+                  DayOf(Now),
+                  StrToInt(Copy(LStrings[13],1,2)),
+                  StrToInt(Copy(LStrings[13],4,2)),
+                  StrToInt(Copy(LStrings[13],7,2)),
+                  0);
+            FTotalBidderCount := StrToInt(LStrings[14]);;
+          end;
+        end;
+      bsSecond:
+        begin
+          if LStrings.Count = 21 then
+          begin
+            FTimeInfo := LStrings[0];
+            FTotalBid := StrToInt(LStrings[19]);;
+            FUnprocessCount := StrToInt(LStrings[20]);
+            FDisplayPrice := StrToInt(LStrings[14]);
+            FLicenseCount := StrToInt(LStrings[4]);
+            FDisplayTime :=
+            EncodeDateTime(
+                  YearOf(Now),
+                  MonthOf(Now),
+                  DayOf(Now),
+                  StrToInt(Copy(LStrings[13],1,2)),
+                  StrToInt(Copy(LStrings[13],4,2)),
+                  StrToInt(Copy(LStrings[13],7,2)),
+                  0);
+            FTotalBidderCount := StrToInt(LStrings[5]);;
+          end;
+        end;
+      bsOutTime:
+        begin
+          FTimeInfo := LStrings[0];
+        end;
+    end;
+  end;
+  LStrings.Free;
+end;
+
+procedure TPriceInfo.SetBidStage(const Value: TBidStage);
+begin
+  FBidStage := Value;
+end;
+
+procedure TPriceInfo.SetDisplayPrice(const Value: Integer);
+begin
+  FDisplayPrice := Value;
+end;
+
+procedure TPriceInfo.SetDisplayTime(const Value: TDateTime);
+begin
+  FDisplayTime := Value;
+end;
+
+procedure TPriceInfo.SetLicenseCount(const Value: Integer);
+begin
+  FLicenseCount := Value;
+end;
+
+procedure TPriceInfo.SetLocalTime(const Value: TDateTime);
+begin
+  FLocalTime := Value;
+end;
+
+procedure TPriceInfo.SetServerTime(const Value: TDateTime);
+begin
+  FServerTime := Value;
+end;
+
+procedure TPriceInfo.SetTimeInfo(const Value: string);
+begin
+  FTimeInfo := Value;
+end;
+
+procedure TPriceInfo.SetTotalBid(const Value: Integer);
+begin
+  FTotalBid := Value;
+end;
+
+procedure TPriceInfo.SetTotalBidderCount(const Value: Integer);
+begin
+  FTotalBidderCount := Value;
+end;
+
+procedure TPriceInfo.SetUnprocessCount(const Value: Integer);
+begin
+  FUnprocessCount := Value;
+end;
+
+{ TPriceInfoList }
+
+function TPriceInfoManager.Add(const Value: TPriceInfo): Integer;
+var
+  LDelta: Integer;
+  I: Integer;
+  LPriceInfo: TPriceInfo;
+  LBasePrice: TPriceInfo;
+begin
+  //自动补掉的包
+  if (Count > 0) and Assigned(Value) then
+  begin
+    LBasePrice := Items[Count - 1];
+    LDelta := SecondsBetween(LBasePrice.ServerTime, Value.ServerTime);
+    for I := 1 to LDelta - 1 do
+    begin
+      LPriceInfo := LBasePrice.Clone;
+      //拼接数据
+      LPriceInfo.ServerTime := IncSecond(LBasePrice.ServerTime, 1);
+      LPriceInfo.DisplayTime := IncSecond(LBasePrice.DisplayTime, 1);
+      LPriceInfo.LocalTime := IncSecond(LBasePrice.LocalTime, 1);
+      LPriceInfo.TotalBid := LPriceInfo.TotalBid +
+        Round((Value.TotalBid - LPriceInfo.TotalBid) / LDelta * I);
+      LPriceInfo.UnprocessCount := LPriceInfo.UnprocessCount +
+        Round((Value.UnprocessCount - LPriceInfo.UnprocessCount) / LDelta * I);
+      Add(LPriceInfo);
+    end;
+  end;
+
+
+  Result := inherited;
+  if Value.BidStage = bsFirst then
+    FFirstBidCount := Value.TotalBid;
+end;
+
+function TPriceInfoManager.BuildPriceInfo(const ARandomString: string): TPriceInfo;
+var
+  strList : TStrings;
+  LLastServerTime: TDateTime;
+  LLastSec1, LLastSec2, LNewSec: Integer;
+  LDelta1, LDelta2: Integer;
+  LThousandsValue: Integer;
+begin
+  Result := nil;
+  if FHackIndex.IsHackTime then
+  begin
+    Result := TPriceInfo.Create('');
+
+
+    LLastServerTime := LastServerTime;
+    LLastSec1 := SecondOf(LLastServerTime);
+
+    LLastSec2 := LLastSec1 mod 10;
+    LLastSec1 := LLastSec1 div 10;
+
+    LNewSec := StrToInt(ARandomString[FHackIndex.ServerTimeSecondIndex]);
+
+    if LLastSec1 >= LNewSec then
+    begin
+      Result.ServerTime := IncSecond(LLastServerTime, (LNewSec - LLastSec1));
+//          EncodeDateTime(
+//                    YearOf(LLastServerTime),
+//                    MonthOf(LLastServerTime),
+//                    DayOf(LLastServerTime),
+//                    HourOf(LLastServerTime),
+//                    MinuteOf(LLastServerTime),
+//                    LNewSec + LLastSec1 * 10,
+//                    0);
+    end
+    else
+    begin
+      Result.ServerTime := IncSecond(LLastServerTime, (LLastSec1 - LNewSec +10));
+    end;
+    if Count > 0 then
+    begin
+      if LNewSec < LLastSec2 then
+        Result.ServerTime := IncSecond(Result.ServerTime, 10);
+    end
+    else
+    begin
+      if LNewSec > LLastSec2 then
+        Result.ServerTime := IncSecond(Result.ServerTime, -10);
+    end;
+
+
+    if FManualThousands <> -1 then
+    begin
+      if FHackIndex.IsHackHundred then
+      begin
+
+        Result.DisplayPrice := 0;
+        //第一条有效的记录
+        if (Count = 0) or (GetLastPrice = 0) then
+          LThousandsValue := FManualThousands
+        else
+          LThousandsValue := (GetLastPrice div 1000) mod 10;
+
+        //进位
+        if FHackIndex.PriceHundredValue = 0 then
+        begin
+          if ((GetLastPrice div 100) mod 10) <> 0 then
+            Result.DisplayPrice := Result.DisplayPrice + 1000;
+        end;
+
+        Result.DisplayPrice :=  Result.DisplayPrice + 80000 +
+          FHackIndex.PriceHundredValue * 100 +
+          (LThousandsValue) * 1000;
+      end;
+    end
+    else
+    begin
+      if FHackIndex.IsHackPrice then
+      begin
+        Result.DisplayPrice := 80000 +
+         FHackIndex.PriceHundredValue * 100 +
+         FHackIndex.PriceThousandsValue * 1000;
+      end;
+    end;
+//      g.Add(LPriceInfo);
+//      UpdatePriceInfo(LPriceInfo);
+//      F_CapInfo.AppendExtInfo(strData);
+  end;
+end;
+
+procedure TPriceInfoManager.AfterConstruction;
+begin
+  inherited;
+  FManualThousands := -1;
+  FHackIndex := THackIndex.Create;
+  FFileName := ExtractFileDir(Application.ExeName) + '\ServerTimeDelta.ini';
+  LoadServerTimeDelta;
+end;
+
+procedure TPriceInfoManager.BeforeDestruction;
+begin
+  FHackIndex.Free;
+  inherited;
+end;
+
+function TPriceInfoManager.GetCalcWaitTime: Double;
+var
+  LCalcSpeed: Double;
+  LLast, LLast2, LPrev: TPriceInfo;
+  LUnprocessDelta: Integer;
+begin
+  Result := -1;
+  if Count > CalcCount then
+  begin
+    LLast := Items[Count - 1];
+    LLast2 := Items[Count - 2];
+    LPrev := Items[Count - CalcCount - 1];
+    LCalcSpeed := ((LLast.TotalBid - LPrev.TotalBid)) / CalcCount;
+    if LCalcSpeed <> 0 then
+      Result := (Last.UnprocessCount) / LCalcSpeed;
+  end;
+end;
+
+function TPriceInfoManager.GetFirstBidCount: Integer;
+begin
+  Result := FFirstBidCount;
+end;
+
+function TPriceInfoManager.GetIsAcceptPrice: Boolean;
+begin
+  Result := False;
+  if (Count > 0) and (FBidPrice <> 0) then
+  begin
+    Result := (FBidPrice <= (Items[Count - 1].DisplayPrice + 300));
+  end;
+end;
+
+function TPriceInfoManager.GetIsBlock: Boolean;
+begin
+  Result := False;
+  if Count > 3 then
+  begin
+    Result := (Items[Count - 1].UnprocessCount > Items[Count - 2].UnprocessCount)
+      and (Items[Count - 2].UnprocessCount > Items[Count - 3].UnprocessCount);
+  end;
+end;
+
+function TPriceInfoManager.GetLastItem: TPriceInfo;
+begin
+  Result := nil;
+  if Count > 0 then
+    Result := Items[Count - 1];
+end;
+
+function TPriceInfoManager.GetLastPrice: Integer;
+begin
+  Result := 0;
+  if Count > 0 then
+    Result := Items[Count - 1].DisplayPrice;
+end;
+
+
+function TPriceInfoManager.GetLastServerTime: TDateTime;
+begin
+  if Count > 0 then
+    Result := Items[Count - 1].ServerTime
+  else
+    Result := Now;
+end;
+
+function TPriceInfoManager.GetLastSmartAdjustPrice: Integer;
+var
+  LLast, LLast2: Integer;
+begin
+  Result := 0;
+  if Count > 1 then
+  begin
+    LLast := Items[Count - 1].DisplayPrice;
+    LLast2 := Items[Count - 2].DisplayPrice;
+    if LLast = LLast2 then
+      Result := LLast
+    else
+      Result := LLast - 100;
+  end;
+end;
+
+function TPriceInfoManager.GetNewBidCount: Integer;
+begin
+  Result := 0;
+  if Count > 2 then
+    Result := Items[Count - 1].TotalBid - Items[Count - 2].TotalBid;
+end;
+
+function TPriceInfoManager.GetSecondBidCount: Integer;
+var
+  LPrice: TPriceInfo;
+begin
+  Result := 0;
+  if Count > 0 then
+  begin
+    LPrice := GetLastItem;
+    if LPrice.BidStage = bsSecond then
+      Result := LPrice.TotalBid - FFirstBidCount;
+  end;
+end;
+
+procedure TPriceInfoManager.LoadServerTimeDelta;
+var
+  LIniFile: TIniFile;
+begin
+  LIniFile := TIniFile.Create(FFileName);
+  FServerTimeDelta := StrToFloatDef(LIniFile.ReadString('ServerTimeDelta', 'Value', '0') ,0);
+  LIniFile.Free;
+end;
+
+procedure TPriceInfoManager.SaveServerTimeDelta;
+var
+  LIniFile: TIniFile;
+begin
+  LIniFile := TIniFile.Create(FFileName);
+  LIniFile.WriteString('ServerTimeDelta', 'Value', FloatToStr(FServerTimeDelta));
+  LIniFile.Free;
+end;
+
+procedure TPriceInfoManager.SetBidPrice(APrice: Integer);
+begin
+  FBidPrice := APrice;
+end;
+
+procedure TPriceInfoManager.SetManualThousands(const Value: Integer);
+begin
+  FManualThousands := Value;
+end;
+
+procedure TPriceInfoManager.SyncServerTimeDelta;
+var
+  I: Integer;
+  LCount: Integer;
+  LDelta: Double;
+begin
+  LCount := 0;
+  F_CapInfo.AppendExtInfo('========Sync Begin==========');
+  for I := Count - 1 downto 0 do
+  begin
+    F_CapInfo.AppendExtInfo('ServerTime: ' + FormatDateTime('hhmmss zzz', Items[I].ServerTime));
+    F_CapInfo.AppendExtInfo('LocalTime: ' + FormatDateTime('hhmmss zzz', Items[I].LocalTime));
+    F_CapInfo.AppendExtInfo('ServerTime-LocalTime: ' + FloatToStr(Items[I].ServerTime - Items[I].LocalTime));
+
+    LDelta := LDelta + Items[I].ServerTime - Items[I].LocalTime;
+    F_CapInfo.AppendExtInfo('Delta: ' + FloatToStr(LDelta));
+    Inc(LCount);
+    if LCount >= 10 then
+      Break;
+  end;
+  if LCount > 0 then
+    FServerTimeDelta := LDelta / LCount;
+
+
+  F_CapInfo.AppendExtInfo('Count:' + IntToStr(LCount));
+  F_CapInfo.AppendExtInfo('ServerTimeDelta:' + FloatToStr(FServerTimeDelta));
+  F_CapInfo.AppendExtInfo('========Sync End==========');
+  SaveServerTimeDelta;
+end;
+
+{ THackIndex }
+
+procedure THackIndex.AddInfo(AInfo: string);
+begin
+  if FInfoLength = 0 then
+    FInfoLength := Length(AInfo)
+  else
+    Assert(FInfoLength = Length(AInfo), '信息长度不一致');
+
+
+  FInfos.Add(AInfo);
+  if FInfos.Count > 1 then
+  begin
+    if IsHackPrice then
+      ReadPrice
+    else
+      HackPrice;
+    if not IsHackTime then
+      HackTime;
+  end;
+end;
+
+procedure THackIndex.AfterConstruction;
+begin
+  inherited;
+  FFileName := ExtractFileDir(Application.ExeName) + '\HackIndex.ini';
+
+  ReHack;
+
+  FInfos := TStringList.Create;
+  FTimeIndex := TList<Integer>.Create;
+  FPriceIndex := TList<Integer>.Create;
+
+  LoadFromFile;
+end;
+
+procedure THackIndex.BeforeDestruction;
+begin
+  SaveToFile;
+
+  FPriceIndex.Free;
+  FTimeIndex.Free;
+  FInfos.Free;
+  inherited;
+end;
+
+function THackIndex.IsIncChar(AChar, AChar2: Char): Boolean;
+var
+  LInt1, LInt2: Integer;
+begin
+  Result := False;
+  if (AChar in ['0'..'9']) and (AChar2 in ['0'..'9']) then
+  begin
+    LInt1 := StrToInt(AChar);
+    LInt2 := StrToInt(AChar2);
+
+    Result := (LInt1 = LInt2 + 1);
+    if not Result then
+    begin
+      case LInt1 of
+        0: Result := (LInt2 >= 7) and (LInt2 <= 9);
+        1: Result := (LInt2 >= 8) and (LInt2 <= 9);
+        2: Result := (LInt2 = 9);
+      else
+        //
+      end;
+    end;
+
+    if (AChar = '0') and (AChar2 = '9') then
+      Result := True
+    else if (StrToInt(AChar) = StrToInt(AChar2) + 1) then
+      Result := True
+  end;
+end;
+
+procedure THackIndex.LoadFromFile;
+var
+  LIniFile: TIniFile;
+begin
+  if FileExists(FFileName) then
+  begin
+    LIniFile := TIniFile.Create(FFileName);
+
+    FServerTimeSecondIndex :=
+      LIniFile.ReadInteger('Values', 'ServerTimeSecondIndex', FServerTimeSecondIndex);
+    FDisplayTimeSecondIndex :=
+      LIniFile.ReadInteger('Values', 'DisplayTimeSecondIndex', FDisplayTimeSecondIndex);
+    FPriceHundredIndex :=
+      LIniFile.ReadInteger('Values', 'PriceHundredIndex', FPriceHundredIndex);
+    FPriceThousandsIndex :=
+      LIniFile.ReadInteger('Values', 'PriceThousandsIndex', FPriceThousandsIndex);
+    FPriceThousandsValue :=
+      LIniFile.ReadInteger('Values', 'PriceThousandsValue', FPriceThousandsValue);
+    FPriceHundredValue :=
+      LIniFile.ReadInteger('Values', 'PriceHundredValue', FPriceHundredValue);
+
+    LIniFile.Free;
+  end;
+
+end;
+
+procedure THackIndex.ReadPrice;
+begin
+  if FPriceHundredIndex <> -1 then
+    FPriceHundredValue := StrToInt(FInfos[FInfos.Count-1][FPriceHundredIndex]);
+  if FPriceThousandsIndex <> -1 then
+    FPriceThousandsValue := StrToInt(FInfos[FInfos.Count-1][FPriceThousandsIndex]);
+end;
+
+procedure THackIndex.ReHack;
+begin
+  FPriceChanged := False;
+  FServerTimeSecondIndex := -1;
+  FDisplayTimeSecondIndex := -1;
+  FPriceHundredIndex := -1;
+  FPriceThousandsIndex := -1;
+  FPriceHundredValue := -1;
+  FPriceThousandsValue := -1;
+end;
+
+procedure THackIndex.HackHundred;
+var
+  I, J, K: Integer;
+  LLast, LLast2: string;
+  LIndex: Integer;
+  LAdd3, LMinus3: Integer;
+  LAdd3Str, LMinus3Str: string;
+  LHasAdd3, LHasMinus3: Boolean;
+  LScan: Boolean;
+begin
+  if FInfos.Count > 1 then
+  begin
+    LLast := FInfos[FInfos.Count-1];
+    LLast2 := FInfos[FInfos.Count-2];
+
+
+    if FInfos.Count = 2 then
+    begin
+      for I := 1 to FInfoLength do
+        if LLast[I] in ['0'..'9'] then
+          if IsIncChar(LLast[I], LLast2[I]) or (LLast[I] = LLast2[I]) then
+            FPriceIndex.Add(I);
+    end
+    else
+    begin
+      for I := FPriceIndex.Count - 1 downto 0 do
+      begin
+        LIndex := FPriceIndex[I];
+
+        if FPriceChanged then
+        begin
+          LScan := True;
+          for K := 0 to FInfos.Count - 1 do
+            if not SameText(LLast[LIndex], FInfos[K][LIndex]) then
+            begin
+              LScan := False;
+              Break;
+            end;
+
+          if LScan then
+          begin
+            if FPriceIndex.Contains(LIndex) then
+              FPriceIndex.Remove(LIndex);
+            Continue;
+          end;
+        end;
+
+
+
+        if IsIncChar(LLast[LIndex], LLast2[LIndex]) or (LLast[LIndex] = LLast2[LIndex]) then
+        begin
+          //有加3 有减3
+          LHasAdd3 := False;
+          LHasMinus3 := False;
+          for J := 1 to FInfoLength do
+          begin
+            if not LHasAdd3 then
+            begin
+              LScan := True;
+              for K := FInfos.Count - 1 downto 0 do
+              begin
+                LAdd3 := StrToInt(FInfos[K][LIndex]) + 3;
+                if LAdd3 > 9 then
+                  LAdd3 := LAdd3 - 10;
+                LAdd3Str := IntToStr(LAdd3);
+                if not SameText(FInfos[K][J], LAdd3Str) then
+                begin
+                  LScan := False;
+                  Break;
+                end;
+              end;
+              LHasAdd3 := LScan;
+            end;
+
+            if not LHasMinus3 then
+            begin
+              LScan := True;
+              for K := FInfos.Count - 1 downto 0 do
+              begin
+                LMinus3 := StrToInt(FInfos[K][LIndex]) - 3;
+                if LMinus3 < 0 then
+                  LMinus3 := LMinus3 + 10;
+                LMinus3Str := IntToStr(LMinus3);
+                if not SameText(FInfos[K][J], LMinus3Str) then
+                begin
+                  LScan := False;
+                  Break;
+                end;
+              end;
+              LHasMinus3 := LScan;
+            end;
+
+            if LHasAdd3 and LHasMinus3 then
+              Break;
+          end;
+
+          if not (LHasAdd3 and LHasMinus3) then
+            if FPriceIndex.Contains(LIndex) then
+              FPriceIndex.Remove(LIndex);
+        end
+        else
+        begin
+          if FPriceIndex.Contains(LIndex) then
+            FPriceIndex.Remove(LIndex);
+        end;
+      end;
+
+      if FPriceIndex.Count = 1 then
+      begin
+        FPriceHundredIndex := FPriceIndex[0];
+      end;
+    end;
+  end;
+end;
+
+procedure THackIndex.HackPrice;
+begin
+  if FPriceHundredIndex = -1 then
+    HackHundred
+  else
+    HackThousands;
+end;
+
+procedure THackIndex.HackThousands;
+var
+  I, J: Integer;
+  LBaseThousands: Integer;
+  LIndex: Integer;
+  LScan: Boolean;
+  LFound: Boolean;
+begin
+  LIndex := -1;
+  LFound := False;
+  for I := 1 to FInfoLength do
+  begin
+    LBaseThousands := StrToIntDef(FInfos[0][I], -1);
+    if LBaseThousands <> -1 then
+    begin
+      LScan := True;
+      for J := 0 to FInfos.Count - 1 do
+      begin
+        if SameText(FInfos[J][FPriceHundredIndex], '0') then
+        begin
+          Inc(LBaseThousands);
+          if LBaseThousands > 9 then
+            LBaseThousands := LBaseThousands - 10;
+        end;
+        if not SameText(FInfos[J][I], IntToStr(LBaseThousands)) then
+        begin
+          LScan := False;
+          Break;
+        end;
+      end;
+      if LScan then
+      begin
+        if LIndex = -1 then
+        begin
+          LIndex := I;
+          LFound := True
+        end
+        else
+        begin
+          LFound := False;
+          Break;
+        end;
+      end;
+    end;
+  end;
+  if LFound then
+    FPriceThousandsIndex := LIndex;
+end;
+
+procedure THackIndex.HackTime;
+var
+  I: Integer;
+  LLast, LLast2: string;
+  LSec, LSec2: Integer;
+begin
+  if FInfos.Count > 1 then
+  begin
+    LLast := FInfos[FInfos.Count-1];
+    LLast2 := FInfos[FInfos.Count-2];
+
+
+    if FInfos.Count = 2 then
+    begin
+      for I := 1 to FInfoLength do
+      begin
+        if IsIncChar(LLast[I], LLast2[I]) then
+        begin
+          FTimeIndex.Add(I);
+        end
+      end;
+    end
+    else
+    begin
+      for I := 1 to FInfoLength do
+      begin
+        if not IsIncChar(LLast[I], LLast2[I]) then
+        begin
+          if FTimeIndex.Contains(I) then
+            FTimeIndex.Remove(I);
+        end;
+      end;
+    end;
+
+    if FTimeIndex.Count = 2 then
+    begin
+      //冗余差一秒 差两秒的情况
+      if (LLast[FTimeIndex[0]] <> '0') and (LLast[FTimeIndex[1]] <> '0') and
+         (LLast[FTimeIndex[0]] <> '9') and (LLast[FTimeIndex[1]] <> '9') then
+      begin
+        LSec := StrToInt(LLast[FTimeIndex[0]]);
+        LSec2 := StrToInt(LLast[FTimeIndex[1]]);
+        if LSec > LSec2 then
+        begin
+          FServerTimeSecondIndex := FTimeIndex[0];
+          FDisplayTimeSecondIndex := FTimeIndex[1];
+        end
+        else
+        begin
+          FServerTimeSecondIndex := FTimeIndex[1];
+          FDisplayTimeSecondIndex := FTimeIndex[0];
+        end;
+      end;
+    end
+    else if FTimeIndex.Count = 1 then
+    begin
+      FServerTimeSecondIndex := FTimeIndex[0];
+    end;
+
+
+  end;
+end;
+
+function THackIndex.IsHackHundred: Boolean;
+begin
+  Result := FPriceHundredIndex <> -1;
+end;
+
+function THackIndex.IsHackPrice: Boolean;
+begin
+  Result := (FPriceHundredIndex <> -1) and (FPriceThousandsIndex <> -1);
+end;
+
+function THackIndex.IsHackTime: Boolean;
+begin
+  Result := FServerTimeSecondIndex <> -1;
+end;
+
+procedure THackIndex.SaveToFile;
+var
+  LIniFile: TIniFile;
+begin
+  LIniFile := TIniFile.Create(FFileName);
+
+  LIniFile.WriteInteger('Values', 'ServerTimeSecondIndex', FServerTimeSecondIndex);
+  LIniFile.WriteInteger('Values', 'DisplayTimeSecondIndex', FDisplayTimeSecondIndex);
+  LIniFile.WriteInteger('Values', 'PriceHundredIndex', FPriceHundredIndex);
+  LIniFile.WriteInteger('Values', 'PriceThousandsIndex', FPriceThousandsIndex);
+  LIniFile.WriteInteger('Values', 'PriceThousandsValue', FPriceThousandsValue);
+  LIniFile.WriteInteger('Values', 'PriceHundredValue', FPriceHundredValue);
+
+  LIniFile.Free;
+end;
+
+procedure THackIndex.SetDisplayTimeSecondIndex(const Value: Integer);
+begin
+  FDisplayTimeSecondIndex := Value;
+end;
+
+procedure THackIndex.SetPriceChanged(const Value: Boolean);
+begin
+  FPriceChanged := Value;
+end;
+
+procedure THackIndex.SetPriceHundredValue(const Value: Integer);
+begin
+  FPriceHundredValue := Value;
+end;
+
+procedure THackIndex.SetPriceThousandsValue(const Value: Integer);
+begin
+  FPriceThousandsValue := Value;
+end;
+
+procedure THackIndex.SetServerTimeSecondIndex(const Value: Integer);
+begin
+  FServerTimeSecondIndex := Value;
+end;
+
+
+procedure THackIndex.RefreshInfo(AInfos: TStrings);
+var
+  LString: string;
+  I: Integer;
+begin
+  AInfos.Clear;
+  AInfos.Add('包总数：' + IntToStr(FInfos.Count));
+
+  LString := '时间索引：';
+  if IsHackTime then
+    LString := LString + '【已破解】';
+  AInfos.Add(LString);
+
+  LString := '时间列:';
+  for I := 0 to FTimeIndex.Count - 1 do
+    LString := LString + IntToStr(FTimeIndex[I]) + ', ';
+
+  AInfos.Add(LString);
+
+  AInfos.Add('');
+
+  LString := '价格索引：';
+  if IsHackPrice then
+    LString := LString + '【已破解】';
+  AInfos.Add(LString);
+
+  LString := '百分位列:';
+  for I := 0 to FPriceIndex.Count - 1 do
+    LString := LString + IntToStr(FPriceIndex[I]) + ', ';
+  AInfos.Add(LString);
+end;
+
+initialization
+  g_PriceInfoManager := TPriceInfoManager.Create;
+
+finalization
+  if Assigned(g_PriceInfoManager) then
+    g_PriceInfoManager.Free;
+
+
+end.

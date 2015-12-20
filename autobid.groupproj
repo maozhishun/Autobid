@@ -1,0 +1,72 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{0B0293C6-67DC-4D01-A5D7-EC934F4560D4}</ProjectGuid>
+		</PropertyGroup>
+		<ItemGroup>
+			<Projects Include="FakeClient\FakeCilent.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="HackIdentifyingCode\HackIdentifyingCode.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="HackIdentifyingCode\IndentifyingCodeKiller.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="AutoBid\AutoBid.dproj">
+				<Dependencies/>
+			</Projects>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Default.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Default.Personality/>
+			</BorlandProject>
+		</ProjectExtensions>
+		<Target Name="FakeCilent">
+			<MSBuild Projects="FakeClient\FakeCilent.dproj"/>
+		</Target>
+		<Target Name="FakeCilent:Clean">
+			<MSBuild Projects="FakeClient\FakeCilent.dproj" Targets="Clean"/>
+		</Target>
+		<Target Name="FakeCilent:Make">
+			<MSBuild Projects="FakeClient\FakeCilent.dproj" Targets="Make"/>
+		</Target>
+		<Target Name="HackIdentifyingCode">
+			<MSBuild Projects="HackIdentifyingCode\HackIdentifyingCode.dproj"/>
+		</Target>
+		<Target Name="HackIdentifyingCode:Clean">
+			<MSBuild Projects="HackIdentifyingCode\HackIdentifyingCode.dproj" Targets="Clean"/>
+		</Target>
+		<Target Name="HackIdentifyingCode:Make">
+			<MSBuild Projects="HackIdentifyingCode\HackIdentifyingCode.dproj" Targets="Make"/>
+		</Target>
+		<Target Name="IndentifyingCodeKiller">
+			<MSBuild Projects="HackIdentifyingCode\IndentifyingCodeKiller.dproj"/>
+		</Target>
+		<Target Name="IndentifyingCodeKiller:Clean">
+			<MSBuild Projects="HackIdentifyingCode\IndentifyingCodeKiller.dproj" Targets="Clean"/>
+		</Target>
+		<Target Name="IndentifyingCodeKiller:Make">
+			<MSBuild Projects="HackIdentifyingCode\IndentifyingCodeKiller.dproj" Targets="Make"/>
+		</Target>
+		<Target Name="AutoBid">
+			<MSBuild Projects="AutoBid\AutoBid.dproj"/>
+		</Target>
+		<Target Name="AutoBid:Clean">
+			<MSBuild Projects="AutoBid\AutoBid.dproj" Targets="Clean"/>
+		</Target>
+		<Target Name="AutoBid:Make">
+			<MSBuild Projects="AutoBid\AutoBid.dproj" Targets="Make"/>
+		</Target>
+		<Target Name="Build">
+			<CallTarget Targets="FakeCilent;HackIdentifyingCode;IndentifyingCodeKiller;AutoBid"/>
+		</Target>
+		<Target Name="Clean">
+			<CallTarget Targets="FakeCilent:Clean;HackIdentifyingCode:Clean;IndentifyingCodeKiller:Clean;AutoBid:Clean"/>
+		</Target>
+		<Target Name="Make">
+			<CallTarget Targets="FakeCilent:Make;HackIdentifyingCode:Make;IndentifyingCodeKiller:Make;AutoBid:Make"/>
+		</Target>
+		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
+	</Project>

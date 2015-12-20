@@ -1,0 +1,17 @@
+program MyIE;
+
+uses
+  Forms,
+  FMain in 'FMain.pas' {F_Main},
+  FCapInfo in 'FCapInfo.pas' {F_CapInfo},
+  uPriceInfo in 'uPriceInfo.pas',
+  uStrategy in 'uStrategy.pas';
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.CreateForm(TF_Main, F_Main);
+  Application.CreateForm(TF_CapInfo, F_CapInfo);
+  Application.Run;
+end.

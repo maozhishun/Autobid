@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2015/03/18 14:30:05.000.686,=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2015/05/14 15:01:09.000.488,=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2015/05/27 15:45:29.000.931,=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2015/06/29 16:13:59.000.165,=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2015/09/17 10:09:13.000.641,=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2015/10/10 11:30:29.000.403,=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2015/10/10 11:32:04.000.923,C:\Users\zsmao\Documents\RAD Studio\Projects\Unit1.dfm=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\ufrmDemo.dfm</Transaction>
+    <Transaction>2015/10/10 11:32:04.000.923,C:\Users\zsmao\Documents\RAD Studio\Projects\Unit1.pas=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\ufrmDemo.pas</Transaction>
+    <Transaction>2015/10/10 11:32:12.000.386,C:\Users\zsmao\Documents\RAD Studio\Projects\Project1.dproj=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\HackIdentifyingCode.dproj</Transaction>
+    <Transaction>2015/10/10 11:35:11.000.936,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\ufrmDemo.dfm=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\ufrmDemo.dfm</Transaction>
+    <Transaction>2015/10/10 11:35:11.000.936,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\ufrmDemo.pas=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\ufrmDemo.pas</Transaction>
+    <Transaction>2015/10/10 11:36:01.000.006,=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\GdiPlus2009.pas</Transaction>
+    <Transaction>2015/10/10 11:40:41.000.299,=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\Unit1.pas</Transaction>
+    <Transaction>2015/10/10 11:41:12.000.682,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\Unit1.pas=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\uColorUtil.pas</Transaction>
+    <Transaction>2015/10/12 15:08:35.000.112,=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\Unit1.pas</Transaction>
+    <Transaction>2015/10/12 15:08:50.000.842,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\uModeCompare.pas=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\Unit1.pas</Transaction>
+    <Transaction>2015/10/14 09:54:34.000.937,=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\Unit1.pas</Transaction>
+    <Transaction>2015/10/14 09:54:51.000.761,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\Unit1.dfm=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\uDataMoudle.dfm</Transaction>
+    <Transaction>2015/10/14 09:54:51.000.761,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\Unit1.pas=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\uDataMoudle.pas</Transaction>
+    <Transaction>2015/10/14 10:00:00.000.473,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\uDataMoudle.pas=</Transaction>
+    <Transaction>2015/10/14 10:00:12.000.953,=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\Unit1.pas</Transaction>
+    <Transaction>2015/10/14 10:01:54.000.296,=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\Unit1.pas</Transaction>
+    <Transaction>2015/10/22 10:50:38.000.281,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\GdiPlus2009.pas=</Transaction>
+    <Transaction>2015/10/22 10:50:44.000.108,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\uModeCompare.pas=</Transaction>
+    <Transaction>2015/10/22 10:50:49.000.652,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\uColorUtil.pas=</Transaction>
+    <Transaction>2015/10/28 13:09:37.000.053,=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\Unit3.pas</Transaction>
+    <Transaction>2015/10/28 13:10:35.000.240,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\uIndentifyingCodeDefine.pas=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\HackIdentifyingCode\Unit3.pas</Transaction>
+  </Transactions>
+</BorlandProject>

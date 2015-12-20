@@ -1,0 +1,39 @@
+unit FCapInfo;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls;
+
+type
+  TF_CapInfo = class(TForm)
+    Memo1: TMemo;
+  private
+    { Private declarations }
+  public
+    procedure UpdateInfo(info:string);
+    procedure AppendExtInfo(info:string);
+  end;
+
+var
+  F_CapInfo: TF_CapInfo;
+
+implementation
+
+{$R *.dfm}
+
+{ TF_CapInfo }
+
+procedure TF_CapInfo.AppendExtInfo(info: TStrings);
+begin
+  self.Memo1.Lines.Add(info);
+end;
+
+procedure TF_CapInfo.UpdateInfo(info: string);
+begin
+  self.Memo1.Text := info;
+
+end;
+
+end.

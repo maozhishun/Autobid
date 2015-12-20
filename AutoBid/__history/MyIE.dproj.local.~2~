@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2015/07/13 17:57:33.897.pas,E:\Code\autobid\MyIE\Unit1.pas=E:\Code\autobid\MyIE\uPriceInfo.pas</Transaction>
+    <Transaction>2015/07/13 21:53:25.706.pas,E:\Code\autobid\MyIE\Unit1.pas=E:\Code\autobid\MyIE\uStrategy.pas</Transaction>
+    <Transaction>2015/07/14 15:12:49.000.651,=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\FOpDeclare.pas</Transaction>
+    <Transaction>2015/07/14 15:12:49.000.675,=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\USetting.pas</Transaction>
+    <Transaction>2015/07/14 15:19:59.000.965,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\ufrmOpDeclare.pas=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\FOpDeclare.pas</Transaction>
+    <Transaction>2015/07/14 15:19:59.000.966,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\ufrmOpDeclare.dfm=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\FOpDeclare.dfm</Transaction>
+    <Transaction>2015/07/14 17:15:54.000.793,=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\Unit1.pas</Transaction>
+    <Transaction>2015/07/14 17:16:19.000.074,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\uHelp.pas=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\Unit1.pas</Transaction>
+    <Transaction>2015/07/14 18:15:46.000.021,=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\Unit1.pas</Transaction>
+    <Transaction>2015/07/14 18:15:52.000.071,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\uKeyHook.pas=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\Unit1.pas</Transaction>
+    <Transaction>2015/07/17 17:11:39.000.131,=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\Unit1.pas</Transaction>
+    <Transaction>2015/07/17 17:11:50.000.380,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\Unit1.pas=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\uTestData.pas</Transaction>
+    <Transaction>2015/08/06 10:19:17.000.676,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\ufrmMain.dfm=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\FMain.dfm</Transaction>
+    <Transaction>2015/08/06 10:19:17.000.676,D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\ufrmMain.pas=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\FMain.pas</Transaction>
+  </Transactions>
+</BorlandProject>

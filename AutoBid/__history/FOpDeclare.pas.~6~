@@ -1,0 +1,222 @@
+unit FOpDeclare;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, Buttons, ExtCtrls;
+
+type
+  TF_OpDeclare = class(TForm)
+    Label1: TLabel;
+    etPriceBegin: TEdit;
+    etPriceEnd: TEdit;
+    Panel1: TPanel;
+    Image1: TImage;
+    Panel2: TPanel;
+    Image2: TImage;
+    BitBtn1: TBitBtn;
+    Label2: TLabel;
+    etBidBegin: TEdit;
+    etBidEnd: TEdit;
+    Panel3: TPanel;
+    Image3: TImage;
+    Panel4: TPanel;
+    Image4: TImage;
+    BitBtn2: TBitBtn;
+    Label3: TLabel;
+    etCodeBegin: TEdit;
+    etCodeEnd: TEdit;
+    Panel5: TPanel;
+    Image5: TImage;
+    Panel6: TPanel;
+    Image6: TImage;
+    BitBtn3: TBitBtn;
+    Label4: TLabel;
+    etSubmitBegin: TEdit;
+    etSubmitEnd: TEdit;
+    Panel7: TPanel;
+    Image7: TImage;
+    Panel8: TPanel;
+    Image8: TImage;
+    BitBtn4: TBitBtn;
+    BitBtn5: TBitBtn;
+    procedure Image1MouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure Image1MouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure Image1MouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
+    procedure Image2MouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
+    procedure Image3MouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
+    procedure Image4MouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
+    procedure Image5MouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
+    procedure Image6MouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
+    procedure Image7MouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
+    procedure Image8MouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
+    procedure BitBtn5Click(Sender: TObject);
+    procedure BitBtn1Click(Sender: TObject);
+    procedure BitBtn2Click(Sender: TObject);
+    procedure BitBtn3Click(Sender: TObject);
+    procedure BitBtn4Click(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+  private
+     procedure SetCursorPoint(  X, Y: Integer;editControl:TEdit;selfControl:TControl);
+  public
+    { Public declarations }
+  end;
+
+var
+  F_OpDeclare: TF_OpDeclare;
+
+implementation
+
+{$R *.dfm}
+
+uses
+  USetting;
+
+const
+  crMyCursor = 201;
+
+
+procedure TF_OpDeclare.Image1MouseDown(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+//  Screen.Cursors[crMyCursor] := LoadCursor(HInstance, 'MYCURSOR1');
+//  Screen.Cursor := crMyCursor;
+  Screen.Cursor := crCross;
+
+end;
+
+procedure TF_OpDeclare.Image1MouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  Screen.Cursor := crDefault;
+end;
+
+procedure TF_OpDeclare.Image1MouseMove(Sender: TObject; Shift: TShiftState;
+  X, Y: Integer);
+begin
+  SetCursorPoint(x,y,self.etPriceBegin, (sender as TControl).Parent);
+end;
+
+procedure TF_OpDeclare.Image2MouseMove(Sender: TObject; Shift: TShiftState;
+  X, Y: Integer);
+begin
+  SetCursorPoint(x,y,self.etPriceEnd,(sender as TControl).Parent);
+end;
+
+procedure TF_OpDeclare.SetCursorPoint(X, Y: Integer; editControl: TEdit;selfControl:TControl);
+var
+  lpoint : TPoint;
+  lhwnd : HWND;
+  lsclassname:array [0..254] of char;
+  lspass:array [0..4095] of char;
+  licount:integer;
+  liProcessID : integer;
+begin
+  if Screen.Cursor <> crDefault then begin
+    lpoint.x := X;
+    lpoint.Y := y +selfcontrol.top;
+    lpoint:= ClientToScreen(lpoint);
+    lpoint.x := lpoint.x +selfControl.left;
+    editControl.Text:=IntToStr(lpoint.x) +','+ IntToStr(lpoint.y);
+  end;
+end;
+
+procedure TF_OpDeclare.Image3MouseMove(Sender: TObject; Shift: TShiftState;
+  X, Y: Integer);
+begin
+  SetCursorPoint(x,y,self.etBidBegin,(sender as TControl).Parent);
+end;
+
+procedure TF_OpDeclare.Image4MouseMove(Sender: TObject; Shift: TShiftState;
+  X, Y: Integer);
+begin
+  SetCursorPoint(x,y,self.etBidEnd,(sender as TControl).Parent);
+end;
+
+procedure TF_OpDeclare.Image5MouseMove(Sender: TObject; Shift: TShiftState;
+  X, Y: Integer);
+begin
+  SetCursorPoint(x,y,self.etCodeBegin,(sender as TControl).Parent);
+end;
+
+procedure TF_OpDeclare.Image6MouseMove(Sender: TObject; Shift: TShiftState;
+  X, Y: Integer);
+begin
+  SetCursorPoint(x,y,self.etCodeEnd,(sender as TControl).Parent);
+end;
+
+procedure TF_OpDeclare.Image7MouseMove(Sender: TObject; Shift: TShiftState;
+  X, Y: Integer);
+begin
+  SetCursorPoint(x,y,self.etSubmitBegin,(sender as TControl).Parent);
+
+end;
+
+procedure TF_OpDeclare.Image8MouseMove(Sender: TObject; Shift: TShiftState;
+  X, Y: Integer);
+begin
+  SetCursorPoint(x,y,self.etSubmitEnd,(sender as TControl).Parent);
+end;
+
+procedure TF_OpDeclare.BitBtn5Click(Sender: TObject);
+begin
+  g_ScreanPointSetting.SetPriceArea(Trim(self.etPriceBegin.Text),trim(self.etPriceEnd.Text));
+  g_ScreanPointSetting.SetBidArea(Trim(self.etBidBegin.Text),trim(self.etBidEnd.Text));
+  g_ScreanPointSetting.SetCodeArea(Trim(self.etCodeBegin.Text),trim(self.etCodeEnd.Text));
+  g_ScreanPointSetting.SetSubmitArea(Trim(self.etSubmitBegin.Text),trim(self.etSubmitEnd.Text));
+  g_ScreanPointSetting.Save2File();
+end;
+
+procedure TF_OpDeclare.BitBtn1Click(Sender: TObject);
+begin
+
+  g_ScreanPointSetting.SetPriceArea(Trim(self.etPriceBegin.Text),trim(self.etPriceEnd.Text));
+  g_ScreanPointSetting.SelectPriceControl();
+
+//  GetCursorPos(oldPoint);
+
+end;
+
+procedure TF_OpDeclare.BitBtn2Click(Sender: TObject);
+begin
+  g_ScreanPointSetting.SetBidArea(Trim(self.etBidBegin.Text),trim(self.etBidEnd.Text));
+end;
+
+procedure TF_OpDeclare.BitBtn3Click(Sender: TObject);
+begin
+  g_ScreanPointSetting.SetCodeArea(Trim(self.etCodeBegin.Text),trim(self.etCodeEnd.Text));
+end;
+
+procedure TF_OpDeclare.BitBtn4Click(Sender: TObject);
+begin
+  g_ScreanPointSetting.SetSubmitArea(Trim(self.etSubmitBegin.Text),trim(self.etSubmitEnd.Text));
+end;
+
+procedure TF_OpDeclare.FormShow(Sender: TObject);
+begin
+  self.etPriceBegin.Text :=  IntToStr(g_ScreanPointSetting.FPriceBeginPoint.X) +','+ IntToStr( F_main.FPointSetting.FPriceBeginPoint.y);
+  self.etPriceEnd.Text :=  IntToStr(g_ScreanPointSetting.FPriceEndPoint.X) +','+ IntToStr( F_main.FPointSetting.FPriceEndPoint.y);
+
+  self.etBidBegin.Text :=  IntToStr(g_ScreanPointSetting.FBidButtonBeginPoint.X) +','+ IntToStr( F_main.FPointSetting.FBidButtonBeginPoint.y);
+  self.etBidEnd.Text :=  IntToStr(g_ScreanPointSetting.FBidButtonEndPoint.X) +','+ IntToStr( F_main.FPointSetting.FBidButtonEndPoint.y);
+
+  self.etCodeBegin.Text :=  IntToStr(g_ScreanPointSetting.FCodeBeginPoint.X) +','+ IntToStr( F_main.FPointSetting.FCodeBeginPoint.y);
+  self.etCodeEnd.Text :=  IntToStr(g_ScreanPointSetting.FCodeEndPoint.X) +','+ IntToStr( F_main.FPointSetting.FCodeEndPoint.y);
+
+  self.etSubmitBegin.Text :=  IntToStr(g_ScreanPointSetting.FSubmitBeginPoint.X) +','+ IntToStr( F_main.FPointSetting.FSubmitBeginPoint.y);
+  self.etSubmitEnd.Text :=  IntToStr(g_ScreanPointSetting.FSubmitEndPoint.X) +','+ IntToStr( F_main.FPointSetting.FSubmitEndPoint.y);
+
+end;
+
+end.

@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2015/03/18 14:30:05.000.686,=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2015/05/14 15:01:09.000.488,=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2015/05/27 15:45:29.000.931,=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2015/06/29 16:13:59.000.165,=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2015/09/17 10:09:13.000.641,=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2015/10/14 09:49:51.000.222,=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2015/11/05 14:03:12.000.831,=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2015/11/05 14:57:32.000.763,=C:\Users\zsmao\Documents\RAD Studio\Projects\Unit4.pas</Transaction>
+    <Transaction>2015/11/05 14:57:54.000.972,=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\FCapInfo.pas</Transaction>
+    <Transaction>2015/11/05 14:57:55.000.062,=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\ufrmMain.pas</Transaction>
+    <Transaction>2015/11/05 14:57:55.000.151,=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\uPriceInfo.pas</Transaction>
+    <Transaction>2015/11/05 14:57:55.000.125,=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\uHelp.pas</Transaction>
+    <Transaction>2015/11/05 14:57:55.000.194,=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\uTestData.pas</Transaction>
+    <Transaction>2015/11/05 14:57:55.000.052,=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\FMain.pas</Transaction>
+    <Transaction>2015/11/05 14:57:55.000.179,=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\uStrategy.pas</Transaction>
+    <Transaction>2015/11/05 14:57:55.000.167,=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\USetting.pas</Transaction>
+    <Transaction>2015/11/05 14:57:55.000.110,=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\ufrmOpDeclare.pas</Transaction>
+    <Transaction>2015/11/05 14:57:55.000.139,=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\uKeyHook.pas</Transaction>
+    <Transaction>2015/11/05 15:00:26.000.980,C:\Users\zsmao\Documents\RAD Studio\Projects\Project1.dproj=D:\svn\BU\Tech\TeamDocs\MEN\Personal\MaoZhishun\autobid\MyIE\AutoBid.dproj</Transaction>
+  </Transactions>
+</BorlandProject>

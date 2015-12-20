@@ -1,0 +1,63 @@
+unit uHelp;
+
+interface
+
+uses
+  Classes, SysUtils, Windows;
+
+
+  procedure MouseClick(location: TPoint);
+  procedure KeyboardInput(AContent: string);
+
+  procedure ClearContent;
+
+implementation
+
+const KeyIntputInterval = 100;{ TODO : 以后做成配置 }
+const MouseIntputInterval = 100;
+
+procedure MouseClick(location: TPoint);
+var
+  clientPoint:TPoint;
+begin
+  Sleep(MouseIntputInterval);
+  windows.SetCursorPos(location.x,location.y);
+  //点击
+  mouse_event(MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_LEFTDOWN,0,0,0,0);
+  mouse_event(MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_LEFTUP,0,0,0,0);
+end;
+
+procedure InputVk(VK: Word);
+begin
+  if GetKeyState(VK_CONTROL) < 0 then
+    keybd_event(VK_CONTROL,0,KEYEVENTF_KEYUP,0);
+  Sleep(KeyIntputInterval);
+  keybd_event(VK,0,0,0);
+  keybd_event(VK,0,KEYEVENTF_KEYUP,0);
+end;
+
+procedure KeyboardInput(AContent: string);
+var
+  I:Integer;
+begin
+  for I := 1 to Length(AContent) do
+  begin
+    InputVk(Ord(AContent[I]));
+  end;
+end;
+
+procedure ClearContent;
+begin
+  InputVk(VK_HOME);
+
+
+  InputVk(VK_DELETE);
+  InputVk(VK_DELETE);
+  InputVk(VK_DELETE);
+  InputVk(VK_DELETE);
+  InputVk(VK_DELETE);
+  InputVk(VK_DELETE);
+  InputVk(VK_DELETE);
+end;
+
+end.

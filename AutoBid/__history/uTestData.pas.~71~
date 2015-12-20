@@ -1,0 +1,39 @@
+unit uTestData;
+
+interface
+
+uses
+  Classes, SysUtils, DateUtils;
+
+  function GetTestData: string;
+
+implementation
+
+var
+  g_TestData: TStringList;
+
+function GetTestData: string;
+var
+  LSecond: Integer;
+  LIndex: Integer;
+begin
+  Result := '';
+  if Assigned(g_TestData) and (g_TestData.Count > 0) then
+  begin
+    LSecond := SecondOf(Now);
+    LIndex := g_TestData.IndexOfName(IntToStr(LSecond));
+    LIndex
+  end;
+end;
+
+
+initialization
+  g_TestData := TStringList.Create;
+  if FileExists('Test.dat') then
+    g_TestData.LoadFromFile('Test.dat');
+
+
+finalization
+  g_TestData.Free;
+
+end.
