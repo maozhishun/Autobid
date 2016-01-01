@@ -22,7 +22,6 @@ type
     FPriceChanged: Boolean;
     procedure SetServerTimeSecondIndex(const Value: Integer);
     procedure SetDisplayTimeSecondIndex(const Value: Integer);
-
     procedure ReadPrice;
     procedure HackHundred;
     procedure HackThousands;
@@ -98,45 +97,23 @@ type
   private
     FHackIndex: THackIndex;
     FFileName: string;
-    FServerTimeDelta: Double;
     FBidPrice: Integer;
-    FFirstBidCount: Integer;
+
     FManualThousands: Integer;
     FFirstManualThousands: Boolean;
     function GetLastPrice: Integer;
-    function GetFirstBidCount: Integer;
-    function GetNewBidCount: Integer;
-    function GetSecondBidCount: Integer;
-    function GetLastItem: TPriceInfo;
-    function GetCalcWaitTime: Double;
-    function GetIsBlock: Boolean;
-    function GetIsAcceptPrice: Boolean;
+
     function GetLastServerTime: TDateTime;
-
-    procedure SaveServerTimeDelta;
-    procedure LoadServerTimeDelta;
-    function GetLastSmartAdjustPrice: Integer;
     procedure SetManualThousands(const Value: Integer);
-
   public
     function Add(const Value: TPriceInfo): Integer;
-    procedure SyncServerTimeDelta;
     procedure SetBidPrice(APrice: Integer);
-
     function BuildPriceInfo(const ARandomString: string): TPriceInfo;
-
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
     property LastPrice: Integer read GetLastPrice;
-    property LastSmartAdjustPrice: Integer read GetLastSmartAdjustPrice;
     property LastServerTime: TDateTime read GetLastServerTime;
-    property NewBidCount: Integer read GetNewBidCount;
-    property FirstBidCount: Integer read GetFirstBidCount;
-    property SecondBidCount: Integer read GetSecondBidCount;
-    property CalcWaitTime: Double read GetCalcWaitTime;
-    property IsBlock: Boolean read GetIsBlock;
-    property IsAcceptPrice: Boolean read GetIsAcceptPrice;
-    property ServerTimeDelta: Double read FServerTimeDelta;
+    
     property HackIndex: THackIndex read FHackIndex;
     property ManualThousands: Integer read FManualThousands write SetManualThousands;
   end;
@@ -343,16 +320,13 @@ begin
 
 
   Result := inherited;
-  if Value.BidStage = bsFirst then
-    FFirstBidCount := Value.TotalBid;
+
 end;
 
 function TPriceInfoManager.BuildPriceInfo(const ARandomString: string): TPriceInfo;
 var
-  strList : TStrings;
   LLastServerTime: TDateTime;
-  LLastSec1, LLastSec2, LNewSec: Integer;
-  LDelta1, LDelta2: Integer;
+  LLastSec1, LNewSec: Integer;
   LThousandsValue: Integer;
 begin
   Result := nil;
@@ -364,7 +338,6 @@ begin
     LLastServerTime := LastServerTime;
     LLastSec1 := SecondOf(LLastServerTime);
 
-    LLastSec2 := LLastSec1 mod 10; //Ãë
     LLastSec1 := LLastSec1 div 10; //10Ãë
 
     LNewSec := StrToInt(ARandomString[FHackIndex.ServerTimeSecondIndex]);
@@ -436,62 +409,12 @@ begin
   FFirstManualThousands := True;
   FHackIndex := THackIndex.Create;
   FFileName := ExtractFileDir(Application.ExeName) + '\ServerTimeDelta.ini';
-  LoadServerTimeDelta;
 end;
 
 procedure TPriceInfoManager.BeforeDestruction;
 begin
   FHackIndex.Free;
   inherited;
-end;
-
-function TPriceInfoManager.GetCalcWaitTime: Double;
-var
-  LCalcSpeed: Double;
-  LLast, LLast2, LPrev: TPriceInfo;
-  LUnprocessDelta: Integer;
-begin
-  Result := -1;
-  if Count > CalcCount then
-  begin
-    LLast := Items[Count - 1];
-    LLast2 := Items[Count - 2];
-    LPrev := Items[Count - CalcCount - 1];
-    LCalcSpeed := ((LLast.TotalBid - LPrev.TotalBid)) / CalcCount;
-    if LCalcSpeed <> 0 then
-      Result := (Last.UnprocessCount) / LCalcSpeed;
-  end;
-end;
-
-function TPriceInfoManager.GetFirstBidCount: Integer;
-begin
-  Result := FFirstBidCount;
-end;
-
-function TPriceInfoManager.GetIsAcceptPrice: Boolean;
-begin
-  Result := False;
-  if (Count > 0) and (FBidPrice <> 0) then
-  begin
-    Result := (FBidPrice <= (Items[Count - 1].DisplayPrice + 300));
-  end;
-end;
-
-function TPriceInfoManager.GetIsBlock: Boolean;
-begin
-  Result := False;
-  if Count > 3 then
-  begin
-    Result := (Items[Count - 1].UnprocessCount > Items[Count - 2].UnprocessCount)
-      and (Items[Count - 2].UnprocessCount > Items[Count - 3].UnprocessCount);
-  end;
-end;
-
-function TPriceInfoManager.GetLastItem: TPriceInfo;
-begin
-  Result := nil;
-  if Count > 0 then
-    Result := Items[Count - 1];
 end;
 
 function TPriceInfoManager.GetLastPrice: Integer;
@@ -510,60 +433,6 @@ begin
     Result := Now;
 end;
 
-function TPriceInfoManager.GetLastSmartAdjustPrice: Integer;
-var
-  LLast, LLast2: Integer;
-begin
-  Result := 0;
-  if Count > 1 then
-  begin
-    LLast := Items[Count - 1].DisplayPrice;
-    LLast2 := Items[Count - 2].DisplayPrice;
-    if LLast = LLast2 then
-      Result := LLast
-    else
-      Result := LLast - 100;
-  end;
-end;
-
-function TPriceInfoManager.GetNewBidCount: Integer;
-begin
-  Result := 0;
-  if Count > 2 then
-    Result := Items[Count - 1].TotalBid - Items[Count - 2].TotalBid;
-end;
-
-function TPriceInfoManager.GetSecondBidCount: Integer;
-var
-  LPrice: TPriceInfo;
-begin
-  Result := 0;
-  if Count > 0 then
-  begin
-    LPrice := GetLastItem;
-    if LPrice.BidStage = bsSecond then
-      Result := LPrice.TotalBid - FFirstBidCount;
-  end;
-end;
-
-procedure TPriceInfoManager.LoadServerTimeDelta;
-var
-  LIniFile: TIniFile;
-begin
-  LIniFile := TIniFile.Create(FFileName);
-  FServerTimeDelta := StrToFloatDef(LIniFile.ReadString('ServerTimeDelta', 'Value', '0') ,0);
-  LIniFile.Free;
-end;
-
-procedure TPriceInfoManager.SaveServerTimeDelta;
-var
-  LIniFile: TIniFile;
-begin
-  LIniFile := TIniFile.Create(FFileName);
-  LIniFile.WriteString('ServerTimeDelta', 'Value', FloatToStr(FServerTimeDelta));
-  LIniFile.Free;
-end;
-
 procedure TPriceInfoManager.SetBidPrice(APrice: Integer);
 begin
   FBidPrice := APrice;
@@ -573,36 +442,6 @@ procedure TPriceInfoManager.SetManualThousands(const Value: Integer);
 begin
   FManualThousands := Value;
   FFirstManualThousands := True;
-end;
-
-procedure TPriceInfoManager.SyncServerTimeDelta;
-var
-  I: Integer;
-  LCount: Integer;
-  LDelta: Double;
-begin
-  LCount := 0;
-  F_CapInfo.AppendExtInfo('========Sync Begin==========');
-  for I := Count - 1 downto 0 do
-  begin
-    F_CapInfo.AppendExtInfo('ServerTime: ' + FormatDateTime('hhmmss zzz', Items[I].ServerTime));
-    F_CapInfo.AppendExtInfo('LocalTime: ' + FormatDateTime('hhmmss zzz', Items[I].LocalTime));
-    F_CapInfo.AppendExtInfo('ServerTime-LocalTime: ' + FloatToStr(Items[I].ServerTime - Items[I].LocalTime));
-
-    LDelta := LDelta + Items[I].ServerTime - Items[I].LocalTime;
-    F_CapInfo.AppendExtInfo('Delta: ' + FloatToStr(LDelta));
-    Inc(LCount);
-    if LCount >= 10 then
-      Break;
-  end;
-  if LCount > 0 then
-    FServerTimeDelta := LDelta / LCount;
-
-
-  F_CapInfo.AppendExtInfo('Count:' + IntToStr(LCount));
-  F_CapInfo.AppendExtInfo('ServerTimeDelta:' + FloatToStr(FServerTimeDelta));
-  F_CapInfo.AppendExtInfo('========Sync End==========');
-  SaveServerTimeDelta;
 end;
 
 { THackIndex }
@@ -655,7 +494,7 @@ var
   LInt1, LInt2: Integer;
 begin
   Result := False;
-  if (AChar in ['0'..'9']) and (AChar2 in ['0'..'9']) then
+  if  CharInSet(AChar, ['0'..'9']) and CharInSet(AChar2, ['0'..'9']) then
   begin
     LInt1 := StrToInt(AChar);
     LInt2 := StrToInt(AChar2);
@@ -743,7 +582,7 @@ begin
     if FInfos.Count = 2 then
     begin
       for I := 1 to FInfoLength do
-        if LLast[I] in ['0'..'9'] then
+        if CharInSet(LLast[I], ['0'..'9']) then
           if IsIncChar(LLast[I], LLast2[I]) or (LLast[I] = LLast2[I]) then
             FPriceIndex.Add(I);
     end

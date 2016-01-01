@@ -144,11 +144,6 @@ end;
 procedure TfrmOpDeclare.SetCursorPoint(X, Y: Integer; editControl: TEdit;selfControl:TControl);
 var
   lpoint : TPoint;
-  lhwnd : HWND;
-  lsclassname:array [0..254] of char;
-  lspass:array [0..4095] of char;
-  licount:integer;
-  liProcessID : integer;
 begin
   if Screen.Cursor <> crDefault then begin
     lpoint.x := X;

@@ -24,8 +24,6 @@ uses
 const MouseIntputInterval = 100;
 
 procedure MouseClick(location: TPoint);
-var
-  clientPoint:TPoint;
 begin
   Sleep(MouseIntputInterval);
   windows.SetCursorPos(location.x,location.y);

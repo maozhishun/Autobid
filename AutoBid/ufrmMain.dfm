@@ -24,41 +24,17 @@ object frmMain: TfrmMain
     TabOrder = 0
     object TabSheet2: TTabSheet
       Caption = #25293#29260#20449#24687
-      object lbServerTime: TLabel
-        Left = 92
-        Top = 6
-        Width = 100
-        Height = 19
-        Caption = 'RemoteTime'
-        Font.Charset = GB2312_CHARSET
-        Font.Color = clRed
-        Font.Height = -19
-        Font.Name = #23435#20307
-        Font.Style = []
-        ParentFont = False
-      end
+      ExplicitLeft = 8
+      ExplicitTop = 22
       object Label5: TLabel
-        Left = 3
-        Top = 36
+        Left = 13
+        Top = 27
         Width = 70
         Height = 14
         Caption = #24403#21069#25104#20132#20215
         Font.Charset = GB2312_CHARSET
         Font.Color = clWindowText
         Font.Height = -14
-        Font.Name = #23435#20307
-        Font.Style = []
-        ParentFont = False
-      end
-      object Label2: TLabel
-        Left = 8
-        Top = 8
-        Width = 72
-        Height = 16
-        Caption = #36828#31243#26102#38388':'
-        Font.Charset = GB2312_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -16
         Font.Name = #23435#20307
         Font.Style = []
         ParentFont = False
@@ -71,7 +47,7 @@ object frmMain: TfrmMain
         Caption = '0'
       end
       object grpManualStrategy: TGroupBox
-        Left = 422
+        Left = 343
         Top = 3
         Width = 195
         Height = 70
@@ -79,8 +55,8 @@ object frmMain: TfrmMain
         TabOrder = 0
       end
       object etCurPrice: TEdit
-        Left = 92
-        Top = 31
+        Left = 94
+        Top = 20
         Width = 121
         Height = 27
         Font.Charset = GB2312_CHARSET
@@ -94,130 +70,20 @@ object frmMain: TfrmMain
         Text = 'Price'
       end
       object grpAutoStrategy: TGroupBox
-        Left = 219
+        Left = 235
         Top = 3
-        Width = 200
+        Width = 102
         Height = 70
         Caption = #33258#21160#31574#30053
         TabOrder = 2
-        object lblSyncTime: TLabel
-          Left = 102
-          Top = 32
-          Width = 18
-          Height = 12
-          Caption = '0'#31186
-        end
-        object Label4: TLabel
-          Left = 13
-          Top = 50
-          Width = 60
-          Height = 12
-          Caption = #36755#20837#29366#24577#65306
-        end
-        object lblCommitStatus: TLabel
-          Left = 102
-          Top = 50
-          Width = 36
-          Height = 12
-          Caption = #26410#36755#20837
-        end
-        object btnSyncServerTime: TButton
-          Left = 21
-          Top = 19
-          Width = 75
-          Height = 25
-          Caption = #21516#27493#26102#38388
-          TabOrder = 0
-          OnClick = btnSyncServerTimeClick
-        end
         object btnPrintAutoStrategy: TButton
-          Left = 157
-          Top = 48
+          Left = 24
+          Top = 32
           Width = 40
           Height = 19
           Caption = #25171#21360
-          TabOrder = 1
+          TabOrder = 0
           OnClick = btnPrintAutoStrategyClick
-        end
-      end
-      object grpAutoFillIndentifyCode: TGroupBox
-        Left = 219
-        Top = 79
-        Width = 200
-        Height = 86
-        Caption = #39564#35777#30721#29366#24577
-        TabOrder = 3
-        object lblAutoFillIndentifyCode: TLabel
-          Left = 102
-          Top = 25
-          Width = 24
-          Height = 12
-          Caption = #33258#21160
-        end
-        object btnAutoFillIndentifyCode: TButton
-          Left = 16
-          Top = 20
-          Width = 75
-          Height = 25
-          Caption = #33258#21160#39564#35777#30721
-          TabOrder = 0
-          OnClick = btnAutoFillIndentifyCodeClick
-        end
-        object chkDownloadCode: TCheckBox
-          Left = 16
-          Top = 57
-          Width = 129
-          Height = 17
-          Caption = #21516#27493#19979#36733#39564#35777#30721
-          TabOrder = 1
-          OnClick = chkDownloadCodeClick
-        end
-      end
-      object grpPrice: TGroupBox
-        Left = 422
-        Top = 79
-        Width = 195
-        Height = 86
-        Caption = #20215#26684
-        Enabled = False
-        TabOrder = 4
-        object btnCutScreen: TButton
-          Left = 24
-          Top = 53
-          Width = 75
-          Height = 25
-          Caption = #24320#21551#25130#23631
-          TabOrder = 0
-          OnClick = btnCutScreenClick
-        end
-        object btnFontSettings: TButton
-          Left = 105
-          Top = 53
-          Width = 75
-          Height = 25
-          Caption = #23383#20307#35774#32622
-          TabOrder = 1
-          OnClick = btnFontSettingsClick
-        end
-        object btnSetThousand: TButton
-          Left = 24
-          Top = 22
-          Width = 75
-          Height = 25
-          Caption = #35774#32622#21315#20301
-          TabOrder = 2
-          OnClick = btnSetThousandClick
-        end
-        object edtThousands: TSpinEdit
-          Left = 105
-          Top = 24
-          Width = 75
-          Height = 21
-          MaxLength = 1
-          MaxValue = 9
-          MinValue = 0
-          TabOrder = 3
-          Value = 2
         end
       end
     end
@@ -253,6 +119,26 @@ object frmMain: TfrmMain
           'mmoHackIndex')
         TabOrder = 1
         WordWrap = False
+      end
+      object btnSetThousand: TButton
+        Left = 27
+        Top = 102
+        Width = 75
+        Height = 25
+        Caption = #35774#32622#21315#20301
+        TabOrder = 2
+        OnClick = btnSetThousandClick
+      end
+      object edtThousands: TSpinEdit
+        Left = 27
+        Top = 133
+        Width = 75
+        Height = 21
+        MaxLength = 1
+        MaxValue = 9
+        MinValue = 0
+        TabOrder = 3
+        Value = 2
       end
     end
     object TabSheet1: TTabSheet
@@ -410,6 +296,15 @@ object frmMain: TfrmMain
         TabOrder = 11
         OnClick = rgCommitSettingsClick
       end
+      object btnFontSettings: TButton
+        Left = 497
+        Top = 3
+        Width = 75
+        Height = 25
+        Caption = #25130#23631#23383#20307
+        TabOrder = 12
+        OnClick = btnFontSettingsClick
+      end
     end
   end
   object pnlToolBar: TPanel
@@ -419,23 +314,23 @@ object frmMain: TfrmMain
     Height = 33
     Align = alTop
     TabOrder = 1
-    object btCapPacket: TBitBtn
-      Left = 12
-      Top = 2
-      Width = 75
-      Height = 25
-      Caption = #24320#22987#26816#27979
-      TabOrder = 0
-      OnClick = btCapPacketClick
-    end
     object Button1: TButton
-      Left = 93
+      Left = 17
       Top = 2
       Width = 75
       Height = 25
       Caption = 'Timer'#27979#35797
-      TabOrder = 1
+      TabOrder = 0
       OnClick = Button1Click
+    end
+    object btnCutScreen: TButton
+      Left = 98
+      Top = 2
+      Width = 75
+      Height = 25
+      Caption = #24320#21551#25130#23631
+      TabOrder = 1
+      OnClick = btnCutScreenClick
     end
   end
   object stat1: TStatusBar
@@ -445,28 +340,35 @@ object frmMain: TfrmMain
     Height = 19
     Panels = <
       item
-        Text = '123'
+        Style = psOwnerDraw
+        Text = #26412#22320#26102#38388
+        Width = 200
+      end
+      item
+        Style = psOwnerDraw
+        Text = #36755#20837#29366#24577#65306#26410#36755#20837
         Width = 50
       end>
+    OnDrawPanel = stat1DrawPanel
   end
   object Timer1: TTimer
-    Interval = 500
+    Interval = 100
     OnTimer = Timer1Timer
-    Left = 640
-    Top = 108
+    Left = 600
+    Top = 116
   end
   object Timer2: TTimer
     Enabled = False
     OnTimer = Timer2Timer
-    Left = 536
-    Top = 172
+    Left = 640
+    Top = 116
   end
   object tmrCutScreen: TTimer
     Enabled = False
     Interval = 100
     OnTimer = tmrCutScreenTimer
-    Left = 624
-    Top = 168
+    Left = 632
+    Top = 184
   end
   object FontDialog1: TFontDialog
     Font.Charset = DEFAULT_CHARSET

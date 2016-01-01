@@ -77,10 +77,7 @@ var
   LSingleImage: IGPBitmap;
   LTestImage: IGPBitmap;
   LBeginPos: Integer;
-  LGraphics: IGPGraphics;
-  LGPRect: TGPRectF;
   LResultCode: string;
-  LFileName: string;
   LRates: TModeRates;
   LCodeIndex: Integer;
 begin

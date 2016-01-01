@@ -11,14 +11,11 @@ type
   TBaseStrategy = class
   private
     FAddPrice: Integer;
-    FSmartAdjust: Boolean;
     procedure SetAddPrice(const Value: Integer);
-    procedure SetSmartAdjust(const Value: Boolean);
   protected
     function GetType: TStrategyType; virtual; abstract;
   public
     property AddPrice: Integer read FAddPrice write SetAddPrice;
-    property SmartAdjust: Boolean read FSmartAdjust write SetSmartAdjust;
     property Type_: TStrategyType read GetType;
   end;
 
@@ -26,16 +23,22 @@ type
   private
     FStartTime: TDateTime;
     FCommitTime: TDateTime;
-
+    FCommitPrice: Integer;
+    FCommitAddPrice: Integer;
     procedure SetStartTime(const Value: TDateTime);
     procedure SetCommitTime(const Value: TDateTime);
-
+    procedure SetCommitPrice(const Value: Integer);
+    procedure SetCommitAddPrice(const Value: Integer);
   protected
     function GetType: TStrategyType; override;
   public
-
     property StartTime: TDateTime read FStartTime write SetStartTime;
     property CommitTime: TDateTime read FCommitTime write SetCommitTime;
+    property CommitAddPrice: Integer read FCommitAddPrice write SetCommitAddPrice;
+
+    //实际提交价格，提交时填充
+    property CommitPrice: Integer read FCommitPrice write SetCommitPrice;
+
   end;
 
   TManualStrategy = class(TBaseStrategy)
@@ -55,15 +58,11 @@ type
   TAutoFillIndentifyCodeStatus = (aficsCompleted, aficsWaitFor);
   TStrategyManager = class(TList<TBaseStrategy>)
   private
-    FBasePrice: Integer;
-    FLastBidTime: TDateTime;
     FIsReadyCommit: Boolean;
     FKeyInputInterval: Integer;
     FFileName: string;
     FIsCopyMode: Boolean;
     FAutoFillIndentifyCodeStatus: TAutoFillIndentifyCodeStatus;
-    FAlwaysDownloadImg: Boolean;
-    FAutoFillIndentifyCode: Boolean;
     procedure ClearItems;
     procedure LoadFromFile;
     function CreateStrategy(AType: TStrategyType): TBaseStrategy;
@@ -71,21 +70,15 @@ type
     procedure SetIsReadyCommit(const Value: Boolean);
     procedure SetKeyInputInterval(const Value: Integer);
     procedure SetIsCopyMode(const Value: Boolean);
-    procedure SetAlwaysDownloadImg(const Value: Boolean);
-    procedure SetAutoFillIndentifyCode(const Value: Boolean);
   public
     procedure InvokeStrategy(AStrategy: TBaseStrategy);
     procedure Submit;
     procedure InputIndentifyCode(const ACode: string);
-    function IsNeedCode: Boolean;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
-    property LastBidTime: TDateTime read FLastBidTime;
     property IsReadyCommit: Boolean read FIsReadyCommit write SetIsReadyCommit;
     property IsCopyMode: Boolean read FIsCopyMode write SetIsCopyMode;
     property KeyInputInterval: Integer read FKeyInputInterval write SetKeyInputInterval;
-    property AlwaysDownloadImg: Boolean read FAlwaysDownloadImg write SetAlwaysDownloadImg;
-    property AutoFillIndentifyCode: Boolean read FAutoFillIndentifyCode write SetAutoFillIndentifyCode;
   end;
 
   TAutoInvokeThread = class(TThread)
@@ -133,6 +126,16 @@ end;
 
 
 
+procedure TAutomaticStrategy.SetCommitAddPrice(const Value: Integer);
+begin
+  FCommitAddPrice := Value;
+end;
+
+procedure TAutomaticStrategy.SetCommitPrice(const Value: Integer);
+begin
+  FCommitPrice := Value;
+end;
+
 procedure TAutomaticStrategy.SetCommitTime(const Value: TDateTime);
 begin
   FCommitTime := Value;
@@ -149,11 +152,6 @@ end;
 procedure TBaseStrategy.SetAddPrice(const Value: Integer);
 begin
   FAddPrice := Value;
-end;
-
-procedure TBaseStrategy.SetSmartAdjust(const Value: Boolean);
-begin
-  FSmartAdjust := Value;
 end;
 
 
@@ -174,10 +172,6 @@ begin
   inherited;
 end;
 
-procedure TStrategyManager.SetAutoFillIndentifyCode(const Value: Boolean);
-begin
-  FAutoFillIndentifyCode := Value;
-end;
 
 
 function TStrategyManager.BuildDateTime(const AString: string): TDateTime;
@@ -248,8 +242,8 @@ begin
 end;
 
 procedure TStrategyManager.InvokeStrategy(AStrategy: TBaseStrategy);
-var
-  LPrice: Integer;
+//var
+//  LPrice: Integer;
 begin
   {
   //执行策略
@@ -278,13 +272,8 @@ begin
   //获取验证码
   MouseClick(g_ScreanPointSetting.GetBidPos);
 
-  if g_StrategyManager.AutoFillIndentifyCode then
-    FAutoFillIndentifyCodeStatus := aficsWaitFor;
-end;
-
-function TStrategyManager.IsNeedCode: Boolean;
-begin
-  Result := FAutoFillIndentifyCodeStatus = aficsWaitFor;
+//  if g_StrategyManager.AutoFillIndentifyCode then
+//    FAutoFillIndentifyCodeStatus := aficsWaitFor;
 end;
 
 procedure TStrategyManager.LoadFromFile;
@@ -300,20 +289,12 @@ var
 begin
   Assert(FileExists(FFileName), '找不到配置文件:Config.ini');
   LIniFile := TIniFile.Create(FFileName);
-
   LCount := LIniFile.ReadInteger('Settings', 'StrategyCount', 0);
-  FBasePrice := LIniFile.ReadInteger('Settings', 'BasePrice', 0);
-  LTemp := LIniFile.ReadString('Settings', 'LastBidTime', '');
-  FLastBidTime := BuildDateTime(LTemp);
 
   FKeyInputInterval := LIniFile.ReadInteger('Settings', 'KeyInputInterval', 100);
   g_KeyIntputInterval := FKeyInputInterval;
   FIsCopyMode :=
     StrToBoolDef(LIniFile.ReadString('Settings', 'IsCopyMode', ''),False);
-  FAlwaysDownloadImg :=
-    StrToBoolDef(LIniFile.ReadString('Settings', 'AlwaysDownloadImg', ''),False);
-  FAutoFillIndentifyCode :=
-      StrToBoolDef(LIniFile.ReadString('Settings', 'AutoFillIndentifyCode', ''), False);
 
   for I := 0 to LCount - 1 do
   begin
@@ -323,7 +304,6 @@ begin
     LStrategy := CreateStrategy(LType);
     Assert(Assigned(LStrategy), '策略类型配置错误');
     LStrategy.AddPrice := LIniFile.ReadInteger(LSection, 'AddPrice', 0);
-    LStrategy.SmartAdjust := StrToBool(LIniFile.ReadString(LSection, 'SmartAdjust', 'False'));
     case LType of
       stAutomatic:
         begin
@@ -334,6 +314,8 @@ begin
           LTemp := LIniFile.ReadString(LSection, 'CommitTime', '');
           LTime := BuildDateTime(LTemp);
           TAutomaticStrategy(LStrategy).CommitTime := LTime;
+
+          TAutomaticStrategy(LStrategy).CommitAddPrice := LIniFile.ReadInteger(LSection, 'CommitAddPrice', 0);
         end;
       stManual:
         begin
@@ -348,11 +330,6 @@ begin
   LIniFile.Free;
 end;
 
-
-procedure TStrategyManager.SetAlwaysDownloadImg(const Value: Boolean);
-begin
-  FAlwaysDownloadImg := Value;
-end;
 
 procedure TStrategyManager.SetIsCopyMode(const Value: Boolean);
 var
@@ -413,20 +390,28 @@ begin
     if Assigned(FStrategy) then
     begin
       if not LIsStart and
-       (FStrategy.StartTime <= (Now + g_PriceInfoManager.ServerTimeDelta)) then
+       (FStrategy.StartTime <= Now) then
       begin
         LIsStart := True;
+        if FStrategy.CommitAddPrice > 0 then
+          FStrategy.CommitPrice := g_PriceInfoManager.LastPrice;
         g_StrategyManager.InvokeStrategy(FStrategy);
       end;
 
-      if not LIsCommit and
-       (FStrategy.CommitTime <= (Now + g_PriceInfoManager.ServerTimeDelta)) and
-       g_StrategyManager.IsReadyCommit then
+      if not LIsCommit and g_StrategyManager.IsReadyCommit and
+       (FStrategy.CommitTime <= Now) then
       begin
         LIsCommit := True;
         g_StrategyManager.Submit;
       end;
-    
+
+      if not LIsCommit and g_StrategyManager.IsReadyCommit and
+       (FStrategy.CommitAddPrice > 0) and (FStrategy.CommitPrice > 0) and
+       (FStrategy.CommitAddPrice + FStrategy.CommitPrice <= g_PriceInfoManager.LastPrice) then
+      begin
+        LIsCommit := True;
+        g_StrategyManager.Submit;
+      end;
     end;
     Sleep(100);
   end;

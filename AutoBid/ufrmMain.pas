@@ -17,14 +17,11 @@ type
 
   TCatchPriceMode = (cpmCutScreen, cpmCapPacket, cpmUnknown);
   TfrmMain = class(TForm)
-    Label2: TLabel;
-    lbServerTime: TLabel;
     Timer1: TTimer;
     Label3: TLabel;
     etFilter: TEdit;
     Label5: TLabel;
     etCurPrice: TEdit;
-    btCapPacket: TBitBtn;
     BitBtn2: TBitBtn;
     ckTop: TCheckBox;
     ckP: TCheckBox;
@@ -37,10 +34,6 @@ type
     PageControl1: TPageControl;
     TabSheet2: TTabSheet;
     TabSheet1: TTabSheet;
-    Label4: TLabel;
-    lblCommitStatus: TLabel;
-    btnSyncServerTime: TButton;
-    lblSyncTime: TLabel;
     grpAutoStrategy: TGroupBox;
     btnPrintAutoStrategy: TButton;
     pnlToolBar: TPanel;
@@ -62,11 +55,6 @@ type
     FontDialog1: TFontDialog;
     seTimerTestInterval: TSpinEdit;
     Label1: TLabel;
-    grpAutoFillIndentifyCode: TGroupBox;
-    grpPrice: TGroupBox;
-    btnAutoFillIndentifyCode: TButton;
-    lblAutoFillIndentifyCode: TLabel;
-    chkDownloadCode: TCheckBox;
     rgCommitSettings: TRadioGroup;
     procedure Timer1Timer(Sender: TObject);
     procedure btCapPacketClick(Sender: TObject);
@@ -76,7 +64,6 @@ type
     procedure Timer2Timer(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
-    procedure btnSyncServerTimeClick(Sender: TObject);
     procedure btnPrintAutoStrategyClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure chkIsCopyModeClick(Sender: TObject);
@@ -87,29 +74,27 @@ type
     procedure tmrCutScreenTimer(Sender: TObject);
     procedure btnFontSettingsClick(Sender: TObject);
     procedure seTimerTestIntervalChange(Sender: TObject);
-    procedure btnAutoFillIndentifyCodeClick(Sender: TObject);
-    procedure chkDownloadCodeClick(Sender: TObject);
     procedure rgCommitSettingsClick(Sender: TObject);
+    procedure stat1DrawPanel(StatusBar: TStatusBar; Panel: TStatusPanel;
+      const Rect: TRect);
   private
     FHotKeyDict: TDictionary<Integer, TButton>;
     FThreadHandles: TList<THandle>;
     FURLPool: TStringList;
     FCatchPriceMode: TCatchPriceMode;
-    procedure StartCap();
+//    procedure StartCap();
     procedure InitStrategy;
     procedure UpdatePriceInfo(APrice: TPriceInfo);
     procedure UpdateCommitStatus;
     procedure UpdateServerTimeDelta;
     procedure UpdatePriceChange;
-    procedure UpdateAutoFillIndentifyCode;
     procedure DoOnStrategyClick(Sender: TObject);
     procedure DoOnHotKeyEvent(AKey: Cardinal; var AHandle: Boolean);
-    procedure GetCodeByURLCallBack(const AURL: PAnsiChar; AURLLength: Integer;
-    const ACode: PAnsiChar; ACodeLength: Integer; ASuccess: Boolean);
+//    procedure GetCodeByURLCallBack(const AURL: PAnsiChar; AURLLength: Integer;
+//    const ACode: PAnsiChar; ACodeLength: Integer; ASuccess: Boolean);
   protected
     procedure CreateHandle; override;
     procedure WM_USERRECEIVECAPINFO(var Message: TMessage); message USER_RECEIVECAPINFO;
-    procedure WM_USERRECEIVEIMAGEURL(var Message: TMessage); message USER_RECEIVEIMAGEURL;
   public
     procedure AnalyzePacket(strData:string);
     procedure AfterConstruction; override;
@@ -133,12 +118,10 @@ var
   G_Handle: THandle = 0;
 
 //type
+//  function startNicCap(filter:PAnsiChar;isSelfOnly:boolean;interval:integer;capAll:integer;
+//    capCallback:pointer;errCallback:pointer):integer;stdcall;external 'PPPriceDetect.dll';
 
-
-  function startNicCap(filter:PAnsiChar;isSelfOnly:boolean;interval:integer;capAll:integer;
-    capCallback:pointer;errCallback:pointer):integer;stdcall;external 'PPPriceDetect.dll';
-
-  procedure initWinSocket();stdcall;external 'PPPriceDetect.dll';
+//  procedure initWinSocket();stdcall;external 'PPPriceDetect.dll';
 
 //  function GetCodeByFile(const AFileName: PAnsiChar; ALength: Integer;
 //    var AOutLength: Integer): PAnsiChar; stdcall; external 'IndentifyingCodeKiller.dll';
@@ -221,6 +204,7 @@ begin
 //  F_Main.mmLog.Lines.Add(errInfo);
 end;
 
+{
 procedure TfrmMain.StartCap;
 var
   liCapAll : integer;
@@ -238,6 +222,7 @@ begin
 
   FCatchPriceMode := cpmCapPacket;
 end;
+}
 
 procedure TfrmMain.Timer1Timer(Sender: TObject);
 begin
@@ -271,7 +256,7 @@ begin
     begin
       LPriceInfo := TPriceInfo.Create('');
       LPriceInfo.DisplayPrice := StrToInt(LString);
-      { TODO : 截取时间 }
+      LPriceInfo.DisplayTime := Now;
       g_PriceInfoManager.Add(LPriceInfo);
       UpdatePriceInfo(LPriceInfo);
       F_CapInfo.AppendExtInfo('截屏价格:'+ LString);
@@ -279,38 +264,16 @@ begin
   end;
 end;
 
-procedure TfrmMain.UpdateAutoFillIndentifyCode;
-begin
-  if g_StrategyManager.AutoFillIndentifyCode then
-  begin
-    lblAutoFillIndentifyCode.Caption := '自动破解';
-    lblAutoFillIndentifyCode.Font.Color := clRed;
-    lblAutoFillIndentifyCode.Font.Style := lblCommitStatus.Font.Style + [fsBold];
-    chkDownloadCode.Enabled := False;
-  end
-  else
-  begin
-    lblAutoFillIndentifyCode.Caption := '未启用';
-    lblAutoFillIndentifyCode.Font.Color := clBlack;
-    lblAutoFillIndentifyCode.Font.Style := lblCommitStatus.Font.Style - [fsBold];
-    chkDownloadCode.Enabled := True;
-  end;
-  chkDownloadCode.Checked := g_StrategyManager.AlwaysDownloadImg;
-end;
 
 procedure TfrmMain.UpdateCommitStatus;
 begin
   if g_StrategyManager.IsReadyCommit then
   begin
-    lblCommitStatus.Caption := '输入完成';
-    lblCommitStatus.Font.Color := clRed;
-    lblCommitStatus.Font.Style := lblCommitStatus.Font.Style + [fsBold];
+    stat1.Panels.Items[1].Text := '输入状态：输入完成';
   end
   else
   begin
-    lblCommitStatus.Caption := '未输入';
-    lblCommitStatus.Font.Color := clBlack;
-    lblCommitStatus.Font.Style := lblCommitStatus.Font.Style - [fsBold];
+    stat1.Panels.Items[1].Text := '输入状态：未输入';
   end;
 end;
 
@@ -328,7 +291,7 @@ procedure TfrmMain.UpdatePriceInfo(APrice: TPriceInfo);
 //  LTime: TDateTime;
 begin
   try
-    lbServerTime.Caption := FormatDateTime('hh:mm:ss', APrice.ServerTime);
+//    lbServerTime.Caption := FormatDateTime('hh:mm:ss', APrice.ServerTime);
 
     if APrice.BidStage in [bsFirst, bsSecond] then
     begin
@@ -336,8 +299,6 @@ begin
 //      lbCustomer.Caption := '投标人数：'+inttostr(APrice.TotalBidderCount);
       etCurPrice.Text := IntToStr(APrice.DisplayPrice);
 //      etCurQLen.Text := IntToStr(APrice.UnprocessCount);
-
-      lbSecondBidCount.Caption := inttostr(g_PriceInfoManager.SecondBidCount);
 //      lbFirstBidCount.Caption := inttostr(g_PriceInfoManager.FirstBidCount);
 //      etNewBidCount.Text := IntToStr(g_PriceInfoManager.NewBidCount);
 //      lbCalcTime.Caption := TimeToStr(APrice.DisplayTime);
@@ -367,8 +328,8 @@ end;
 
 procedure TfrmMain.UpdateServerTimeDelta;
 begin
-  lblSyncTime.Caption :=
-    FormatFloat('####.##', g_PriceInfoManager.ServerTimeDelta * 24 * 3600) + '秒';
+//  lblSyncTime.Caption :=
+//    FormatFloat('####.##', g_PriceInfoManager.ServerTimeDelta * 24 * 3600) + '秒';
 end;
 
 procedure TfrmMain.WM_USERRECEIVECAPINFO(var Message: TMessage);
@@ -383,48 +344,9 @@ begin
     AnalyzePacket(LStr);
 end;
 
-procedure TfrmMain.WM_USERRECEIVEIMAGEURL(var Message: TMessage);
-var
-  LURL: string;
-  LPath: string;
-  LFileName: string;
-  LSplitStrings: TStringList;
-begin
-  F_CapInfo.AppendExtInfo(G_CapInfoURL);
-
-  if g_StrategyManager.IsNeedCode and (FURLPool.IndexOf(G_CapInfoURL) = -1) then
-  begin
-    GetCodeByURL(G_CapInfoURL, GetCodeByURLCallBack, 3, 500);
-    FURLPool.Add(G_CapInfoURL);
-  end
-  else
-  begin
-    if g_StrategyManager.AlwaysDownloadImg then
-    begin
-      LURL := G_CapInfoURL;
-
-      LSplitStrings := TStringList.Create;
-      LSplitStrings.Delimiter := '/';
-      LSplitStrings.DelimitedText := LURL;
-      LFileName := LSplitStrings[LSplitStrings.Count - 1];
-      LSplitStrings.Free;
-
-
-      LPath := './code/download';
-      LFileName := LPath + '/'  + LFileName;
-      if not DirectoryExists(LPath) then
-        ForceDirectories(LPath);
-      if FileExists(LFileName) then
-        DeleteFile(PChar(LFileName));
-
-      URLDownloadToFile(nil, PChar(LURL), PChar(LFileName), 0, nil);
-    end;
-  end;
-end;
-
 procedure TfrmMain.btCapPacketClick(Sender: TObject);
 begin
-  StartCap();
+//  StartCap();
 end;
 
 procedure TfrmMain.btnOpDeclareClick(Sender: TObject);
@@ -459,16 +381,11 @@ begin
           F_CapInfo.AppendExtInfo('开始时间:' + FormatDateTime('YYYYMMDD hhmmss zzz', LStrategy.StartTime));
           F_CapInfo.AppendExtInfo('加价:' + IntToStr(LStrategy.AddPrice));
           F_CapInfo.AppendExtInfo('提交时间:' + FormatDateTime('YYYYMMDD hhmmss zzz', LStrategy.CommitTime));
+          F_CapInfo.AppendExtInfo('提交价格:' + IntToStr(LStrategy.CommitAddPrice));
         end;
     end;
   end;
   F_CapInfo.Show();
-end;
-
-procedure TfrmMain.btnSyncServerTimeClick(Sender: TObject);
-begin
-  g_PriceInfoManager.SyncServerTimeDelta;
-  UpdateServerTimeDelta;
 end;
 
 procedure TfrmMain.Button1Click(Sender: TObject);
@@ -508,13 +425,6 @@ begin
   CreateThread(nil, 0, @SendTestData, nil, 0, LID2);
 end;
 
-procedure TfrmMain.btnAutoFillIndentifyCodeClick(Sender: TObject);
-begin
-  g_StrategyManager.AutoFillIndentifyCode := not
-    g_StrategyManager.AutoFillIndentifyCode;
-  UpdateAutoFillIndentifyCode;
-end;
-
 procedure TfrmMain.btnSetThousandClick(Sender: TObject);
 begin
   g_PriceInfoManager.ManualThousands := edtThousands.Value;
@@ -522,16 +432,19 @@ end;
 
 procedure TfrmMain.btnCutScreenClick(Sender: TObject);
 begin
-  ShowMessage(g_CutScreenMgr.GetCutScreenPrice);
+//  ShowMessage(g_CutScreenMgr.GetCutScreenPrice);
 
-//  FCatchPriceMode := cpmCutScreen;
-//  tmrCutScreen.Enabled := True;
+  FCatchPriceMode := cpmCutScreen;
+  tmrCutScreen.Enabled := True;
 //  btnCutScreen.Enabled := False;
   //ShowMessage(g_CutScreenMgr.GetCutScreenPrice);
 end;
 
 procedure TfrmMain.btnFontSettingsClick(Sender: TObject);
 begin
+  FontDialog1.Font.Name := g_FontModeCompareMgr.FontName;
+  FontDialog1.Font.Size := g_FontModeCompareMgr.FontSize;
+  FontDialog1.Font.Style := g_FontModeCompareMgr.FontStyles;
   if FontDialog1.Execute(Self.Handle) then
   begin
     g_FontModeCompareMgr.SetFontMode(
@@ -570,7 +483,7 @@ begin
   FThreadHandles := TList<THandle>.Create;
 
   Timer1.Enabled := True;
-  initWinSocket();
+//  initWinSocket();
   self.Top := 0;
   self.Left := 0;
   InitStrategy;
@@ -584,8 +497,6 @@ begin
   Timer2.Interval := g_AppSettings.TestTimeInterval;
 
   rgCommitSettings.ItemIndex := Ord(g_AppSettings.CommitKeyInput);
-
-  UpdateAutoFillIndentifyCode;
 end;
 
 procedure TfrmMain.AnalyzePacket(strData: string);
@@ -614,10 +525,6 @@ begin
   end;
 end;
 
-procedure TfrmMain.chkDownloadCodeClick(Sender: TObject);
-begin
-  g_StrategyManager.AlwaysDownloadImg := chkDownloadCode.Checked;
-end;
 
 procedure TfrmMain.chkIsCopyModeClick(Sender: TObject);
 begin
@@ -679,16 +586,6 @@ begin
           g_StrategyManager.IsReadyCommit := False;
           UpdateCommitStatus;
         end;
-      VK_NEXT:
-        begin
-          g_StrategyManager.AutoFillIndentifyCode := False;
-          UpdateAutoFillIndentifyCode;
-        end;
-      VK_PRIOR:
-        begin
-          g_StrategyManager.AutoFillIndentifyCode := True;
-          UpdateAutoFillIndentifyCode;
-        end;
       96..105:  //Ctrl+小键盘0-9
         begin
           if FHotKeyDict.ContainsKey(AKey - 96) then
@@ -734,6 +631,7 @@ begin
   chkIsCopyMode.Checked := g_StrategyManager.IsCopyMode;
 end;
 
+{
 procedure TfrmMain.GetCodeByURLCallBack(const AURL: PAnsiChar; AURLLength: Integer;
     const ACode: PAnsiChar; ACodeLength: Integer; ASuccess: Boolean);
 var
@@ -756,6 +654,7 @@ begin
     UpdateCommitStatus;
   end;
 end;
+}
 
 procedure TfrmMain.InitStrategy;
 const
@@ -815,6 +714,34 @@ begin
   except
     //
   end;
+end;
+
+procedure TfrmMain.stat1DrawPanel(StatusBar: TStatusBar; Panel: TStatusPanel;
+  const Rect: TRect);
+begin
+  case Panel.ID of
+    0:
+      begin
+        StatusBar.Canvas.Font.Color := clBlack;
+      end;
+    1:
+      begin
+        if g_StrategyManager.IsReadyCommit then
+        begin
+          StatusBar.Canvas.Font.Color := clRed;
+          StatusBar.Canvas.Font.Style := [fsBold];
+        end
+        else
+        begin
+          StatusBar.Canvas.Font.Color := clBlack;
+          StatusBar.Canvas.Font.Style := [];
+        end;
+      end;
+
+  end;
+  // 绘制文字
+  TextOut(StatusBar.Canvas.Handle, Rect.Left, Rect.Top, PChar(Panel.Text),
+    Length(Panel.Text));
 end;
 
 initialization;

@@ -16,10 +16,23 @@ object Form1: TForm1
   TextHeight = 13
   object Label1: TLabel
     Left = 32
-    Top = 43
+    Top = 91
     Width = 60
     Height = 13
     Caption = #24403#21069#20215#26684#65306
+  end
+  object Label2: TLabel
+    Left = 98
+    Top = 91
+    Width = 40
+    Height = 15
+    Caption = '82600'
+    Font.Charset = GB2312_CHARSET
+    Font.Color = clRed
+    Font.Height = -15
+    Font.Name = #26032#23435#20307
+    Font.Style = []
+    ParentFont = False
   end
   object Button1: TButton
     Left = 240
@@ -54,12 +67,10 @@ object Form1: TForm1
     TabOrder = 3
     Text = '1000'
   end
-  object Edit3: TEdit
-    Left = 88
-    Top = 40
-    Width = 121
-    Height = 21
-    TabOrder = 4
-    Text = '84800'
+  object Timer1: TTimer
+    Interval = 500
+    OnTimer = Timer1Timer
+    Left = 80
+    Top = 248
   end
 end

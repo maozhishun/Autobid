@@ -14,7 +14,7 @@ type
     FBitmap: IGPBitmap;
     procedure SetCode(const Value: string);
     procedure SetBitmap(const Value: IGPBitmap);
-  published
+  public
     property Bitmap: IGPBitmap read FBitmap write SetBitmap;
     property Code: string read FCode write SetCode;
   end;
@@ -40,17 +40,26 @@ type
 
   TFontModeCompareMgr = class(TModeCompareMgr)
   private
+    FFileName: string;
     FFontName: string;
     FFontSize: Integer;
     FFontStyles: TFontStyles;
     function CreateFontBitmap(AInt: Integer): IGPBitmap;
     function TrimBitmap(ASource: IGPBitmap): IGPBitmap;
+
+    function FontStylesToInt(AFontStyles: TFontStyles): Integer;
+    function IntToFontStyles(AInt: Integer): TFontStyles;
+    procedure LoadFromFile;
+    procedure SaveToFile;
   protected
     procedure InitMode; override;
   public
     procedure SetFontMode(AFontName: string; AFontSize: Integer; AFontStyles: TFontStyles);
     procedure AfterConstruction; override;
     function ScanMode(ASource: IGPBitmap): string;
+    property FontName: string read FFontName;
+    property FontSize: Integer read FFontSize;
+    property FontStyles: TFontStyles read FFontStyles;
   end;
 
 var
@@ -60,7 +69,7 @@ var
 implementation
 
 uses
-  Vcl.Dialogs, uColorUtil;
+  Vcl.Dialogs, uColorUtil, System.IniFiles, Vcl.Forms;
 
 { TModeItem }
 
@@ -222,9 +231,11 @@ end;
 
 procedure TFontModeCompareMgr.AfterConstruction;
 begin
+  FFileName := ExtractFileDir(Application.ExeName) + '\FontMode.ini';
   FFontName := 'ËÎÌå';
-  FFontSize := 10;
-  FFontStyles := [fsBold];
+  FFontSize := 11;
+  FFontStyles := [];
+  LoadFromFile;
   inherited;
 
 end;
@@ -264,6 +275,19 @@ begin
   end;
 end;
 
+function TFontModeCompareMgr.FontStylesToInt(AFontStyles: TFontStyles): Integer;
+begin
+  Result := 0;
+  if fsBold in AFontStyles then
+    Result := Result + 1;
+  if fsItalic in AFontStyles then
+    Result := Result + 2;
+  if fsUnderline in AFontStyles then
+    Result := Result + 4;
+  if fsStrikeOut in AFontStyles then
+    Result := Result + 8;
+end;
+
 procedure TFontModeCompareMgr.InitMode;
 var
   I: Integer;
@@ -279,6 +303,36 @@ begin
   end;
 end;
 
+
+function TFontModeCompareMgr.IntToFontStyles(AInt: Integer): TFontStyles;
+begin
+  Result := [];
+  if AInt and 1 = 1 then
+    Result := Result + [fsBold];
+  if AInt and 2 = 2 then
+    Result := Result + [fsItalic];
+  if AInt and 4 = 4 then
+    Result := Result + [fsUnderline];
+  if AInt and 8 = 8 then
+    Result := Result + [fsStrikeOut];
+end;
+
+procedure TFontModeCompareMgr.LoadFromFile;
+var
+  LIniFile: TIniFile;
+begin
+  if FileExists(FFileName) then
+  begin
+    LIniFile := TIniFile.Create(FFileName);
+    FFontName :=
+      LIniFile.ReadString('Values', 'FontName', FFontName);
+    FFontSize :=
+      LIniFile.ReadInteger('Values', 'FontSize', FFontSize);
+    FFontStyles :=
+      IntToFontStyles(LIniFile.ReadInteger('Values', 'FontStyles', FontStylesToInt(FFontStyles)));
+    LIniFile.Free;
+  end;
+end;
 
 function ResultCompare(List: TStringList; Index1, Index2: Integer): Integer;
 var
@@ -298,6 +352,17 @@ begin
 
 end;
 
+procedure TFontModeCompareMgr.SaveToFile;
+var
+  LIniFile: TIniFile;
+begin
+  LIniFile := TIniFile.Create(FFileName);
+  LIniFile.WriteString('Values', 'FontName', FFontName);
+  LIniFile.WriteInteger('Values', 'FontSize', FFontSize);
+  LIniFile.WriteInteger('Values', 'FontStyles', FontStylesToInt(FFontStyles));
+  LIniFile.Free;
+end;
+
 function TFontModeCompareMgr.ScanMode(ASource: IGPBitmap): string;
 var
   I, J, K: Integer;
@@ -313,41 +378,44 @@ begin
   begin
     LTemp := ASource.Clone;
     LTemp := TrimBitmap(LTemp);
-    LTemp.Save('.\code\tmp\CutScreen.bmp', TGPImageFormat.Bmp);
-
-    //×ÝÏòÉ¨Ãè
-    LResultList := TStringList.Create;
-    for I := 0 to LTemp.Height - 1 do
+    if Assigned(LTemp) then
     begin
-      //0-9Ñ­»·
-      for J := 0 to 9 do
+      LTemp.Save('.\code\tmp\CutScreen.bmp', TGPImageFormat.Bmp);
+
+      //×ÝÏòÉ¨Ãè
+      LResultList := TStringList.Create;
+      for I := 0 to LTemp.Height - 1 do
       begin
-        LModeItem := FModeList[J];
-        LModeBitmap := LModeItem.Bitmap;
-
-        if I + LModeBitmap.Height > LTemp.Height then
-          Continue;
-
-        //ºáÏòÉ¨Ãè
-        for K := 0 to LTemp.Width - LModeBitmap.Width do
+        //0-9Ñ­»·
+        for J := 0 to 9 do
         begin
-          LCount := CalcSamePixelCount(LTemp, LModeBitmap, K, I);
-          if LCount = LModeBitmap.Width * LModeBitmap.Height then
+          LModeItem := FModeList[J];
+          LModeBitmap := LModeItem.Bitmap;
+
+          if I + LModeBitmap.Height > LTemp.Height then
+            Continue;
+
+          //ºáÏòÉ¨Ãè
+          for K := 0 to LTemp.Width - LModeBitmap.Width do
           begin
-            LResultList.Add(IntToStr(K) + '=' + LModeItem.FCode);
+            LCount := CalcSamePixelCount(LTemp, LModeBitmap, K, I);
+            if LCount = LModeBitmap.Width * LModeBitmap.Height then
+            begin
+              LResultList.Add(IntToStr(K) + '=' + LModeItem.FCode);
+            end;
           end;
         end;
+        if LResultList.Count > 0 then
+          Break;
       end;
-      if LResultList.Count > 0 then
-        Break;
+
+
+      LResultList.CustomSort(ResultCompare);
+      for I := 0 to LResultList.Count - 1 do
+        Result := Result + LResultList.ValueFromIndex[I];
+
+      LResultList.Free;
     end;
-
-
-    LResultList.CustomSort(ResultCompare);
-    for I := 0 to LResultList.Count - 1 do
-      Result := Result + LResultList.ValueFromIndex[I];
-
-    LResultList.Free;
   end;
 
 end;
@@ -358,7 +426,9 @@ begin
   FFontName := AFontName;
   FFontSize := AFontSize;
   FFontStyles := AFontStyles;
-  //InitMode;
+  UnInitMode;
+  InitMode;
+  SaveToFile;
 end;
 
 function TFontModeCompareMgr.TrimBitmap(ASource: IGPBitmap): IGPBitmap;
@@ -369,6 +439,7 @@ var
   LRect: TRect;
   LTrimBMP: TBitmap;
 begin
+  Result := nil;
   LGpBitmap := ASource.Clone;
   GraySplit(LGpBitmap, PriceGrayMin, PriceGrayMax);
   //²Ã¼ôÁô°×ÇøÓò
@@ -442,18 +513,20 @@ begin
   end;
 
 
-
-  LTrimBMP := TBitmap.Create;
-  LTrimBMP.Width := LRect.Width;
-  LTrimBMP.Height := LRect.Height;
-  Result := TGPBitmap.Create(LTrimBMP.Handle, GdipCreateHalftonePalette);
-  for I := 0 to Result.Width - 1 do
-    for J := 0 to Result.Height - 1 do
-    begin
-      Result.Pixels[I, J] := TGPColor.CreateFromColorRef(
-        LGpBitmap.Pixels[I + LRect.Left, J + LRect.Top].ColorRef)
-    end;
-  LTrimBMP.Free;
+  if (LRect.Width > 0) and (LRect.Height > 0) then
+  begin
+    LTrimBMP := TBitmap.Create;
+    LTrimBMP.Width := LRect.Width + 1;
+    LTrimBMP.Height := LRect.Height + 1;
+    Result := TGPBitmap.Create(LTrimBMP.Handle, GdipCreateHalftonePalette);
+    for I := 0 to Result.Width - 1 do
+      for J := 0 to Result.Height - 1 do
+      begin
+        Result.Pixels[I, J] := TGPColor.CreateFromColorRef(
+          LGpBitmap.Pixels[I + LRect.Left, J + LRect.Top].ColorRef)
+      end;
+    LTrimBMP.Free;
+  end;
 end;
 
 initialization

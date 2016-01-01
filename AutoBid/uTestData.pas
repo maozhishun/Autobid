@@ -14,9 +14,6 @@ var
   g_Index: Integer;
 
 function GetTestData: string;
-var
-  LSecond: Integer;
-  LIndex: Integer;
 begin
   Result := '';
   if Assigned(g_TestData) and (g_TestData.Count > 0) then

@@ -105,8 +105,8 @@ object frmOpDeclare: TfrmOpDeclare
     object Image1: TImage
       Left = 2
       Top = 2
-      Width = 21
-      Height = 21
+      Width = 16
+      Height = 16
       Align = alClient
       AutoSize = True
       Picture.Data = {
@@ -124,6 +124,8 @@ object frmOpDeclare: TfrmOpDeclare
       OnMouseDown = Image1MouseDown
       OnMouseMove = Image1MouseMove
       OnMouseUp = Image1MouseUp
+      ExplicitWidth = 21
+      ExplicitHeight = 21
     end
   end
   object Panel2: TPanel
@@ -136,8 +138,8 @@ object frmOpDeclare: TfrmOpDeclare
     object Image2: TImage
       Left = 2
       Top = 2
-      Width = 21
-      Height = 21
+      Width = 16
+      Height = 16
       Align = alClient
       AutoSize = True
       Picture.Data = {
@@ -155,6 +157,8 @@ object frmOpDeclare: TfrmOpDeclare
       OnMouseDown = Image1MouseDown
       OnMouseMove = Image2MouseMove
       OnMouseUp = Image1MouseUp
+      ExplicitWidth = 21
+      ExplicitHeight = 21
     end
   end
   object BitBtn1: TBitBtn
@@ -190,8 +194,8 @@ object frmOpDeclare: TfrmOpDeclare
     object Image3: TImage
       Left = 2
       Top = 2
-      Width = 21
-      Height = 21
+      Width = 16
+      Height = 16
       Align = alClient
       AutoSize = True
       Picture.Data = {
@@ -209,6 +213,8 @@ object frmOpDeclare: TfrmOpDeclare
       OnMouseDown = Image1MouseDown
       OnMouseMove = Image3MouseMove
       OnMouseUp = Image1MouseUp
+      ExplicitWidth = 21
+      ExplicitHeight = 21
     end
   end
   object Panel4: TPanel
@@ -221,8 +227,8 @@ object frmOpDeclare: TfrmOpDeclare
     object Image4: TImage
       Left = 2
       Top = 2
-      Width = 21
-      Height = 21
+      Width = 16
+      Height = 16
       Align = alClient
       AutoSize = True
       Picture.Data = {
@@ -240,6 +246,8 @@ object frmOpDeclare: TfrmOpDeclare
       OnMouseDown = Image1MouseDown
       OnMouseMove = Image4MouseMove
       OnMouseUp = Image1MouseUp
+      ExplicitWidth = 21
+      ExplicitHeight = 21
     end
   end
   object BitBtn2: TBitBtn
@@ -275,8 +283,8 @@ object frmOpDeclare: TfrmOpDeclare
     object Image5: TImage
       Left = 2
       Top = 2
-      Width = 21
-      Height = 21
+      Width = 16
+      Height = 16
       Align = alClient
       AutoSize = True
       Picture.Data = {
@@ -294,6 +302,8 @@ object frmOpDeclare: TfrmOpDeclare
       OnMouseDown = Image1MouseDown
       OnMouseMove = Image5MouseMove
       OnMouseUp = Image1MouseUp
+      ExplicitWidth = 21
+      ExplicitHeight = 21
     end
   end
   object Panel6: TPanel
@@ -306,8 +316,8 @@ object frmOpDeclare: TfrmOpDeclare
     object Image6: TImage
       Left = 2
       Top = 2
-      Width = 21
-      Height = 21
+      Width = 16
+      Height = 16
       Align = alClient
       AutoSize = True
       Picture.Data = {
@@ -325,6 +335,8 @@ object frmOpDeclare: TfrmOpDeclare
       OnMouseDown = Image1MouseDown
       OnMouseMove = Image6MouseMove
       OnMouseUp = Image1MouseUp
+      ExplicitWidth = 21
+      ExplicitHeight = 21
     end
   end
   object BitBtn3: TBitBtn
@@ -360,8 +372,8 @@ object frmOpDeclare: TfrmOpDeclare
     object Image7: TImage
       Left = 2
       Top = 2
-      Width = 21
-      Height = 21
+      Width = 16
+      Height = 16
       Align = alClient
       AutoSize = True
       Picture.Data = {
@@ -379,6 +391,8 @@ object frmOpDeclare: TfrmOpDeclare
       OnMouseDown = Image1MouseDown
       OnMouseMove = Image7MouseMove
       OnMouseUp = Image1MouseUp
+      ExplicitWidth = 21
+      ExplicitHeight = 21
     end
   end
   object Panel8: TPanel
@@ -391,8 +405,8 @@ object frmOpDeclare: TfrmOpDeclare
     object Image8: TImage
       Left = 2
       Top = 2
-      Width = 21
-      Height = 21
+      Width = 16
+      Height = 16
       Align = alClient
       AutoSize = True
       Picture.Data = {
@@ -410,6 +424,8 @@ object frmOpDeclare: TfrmOpDeclare
       OnMouseDown = Image1MouseDown
       OnMouseMove = Image8MouseMove
       OnMouseUp = Image1MouseUp
+      ExplicitWidth = 21
+      ExplicitHeight = 21
     end
   end
   object BitBtn4: TBitBtn
@@ -463,8 +479,8 @@ object frmOpDeclare: TfrmOpDeclare
     object Image9: TImage
       Left = 2
       Top = 2
-      Width = 21
-      Height = 21
+      Width = 16
+      Height = 16
       Align = alClient
       AutoSize = True
       Picture.Data = {
@@ -482,6 +498,8 @@ object frmOpDeclare: TfrmOpDeclare
       OnMouseDown = Image1MouseDown
       OnMouseMove = Image9MouseMove
       OnMouseUp = Image1MouseUp
+      ExplicitWidth = 21
+      ExplicitHeight = 21
     end
   end
   object Panel10: TPanel
@@ -494,8 +512,8 @@ object frmOpDeclare: TfrmOpDeclare
     object Image10: TImage
       Left = 2
       Top = 2
-      Width = 21
-      Height = 21
+      Width = 16
+      Height = 16
       Align = alClient
       AutoSize = True
       Picture.Data = {
@@ -513,6 +531,8 @@ object frmOpDeclare: TfrmOpDeclare
       OnMouseDown = Image1MouseDown
       OnMouseMove = Image10MouseMove
       OnMouseUp = Image1MouseUp
+      ExplicitWidth = 21
+      ExplicitHeight = 21
     end
   end
   object edtCustomAddPriceBegin: TEdit
@@ -539,8 +559,8 @@ object frmOpDeclare: TfrmOpDeclare
     object Image11: TImage
       Left = 2
       Top = 2
-      Width = 21
-      Height = 21
+      Width = 16
+      Height = 16
       Align = alClient
       AutoSize = True
       Picture.Data = {
@@ -558,6 +578,8 @@ object frmOpDeclare: TfrmOpDeclare
       OnMouseDown = Image1MouseDown
       OnMouseMove = Image11MouseMove
       OnMouseUp = Image1MouseUp
+      ExplicitWidth = 21
+      ExplicitHeight = 21
     end
   end
   object Panel12: TPanel
@@ -570,8 +592,8 @@ object frmOpDeclare: TfrmOpDeclare
     object Image12: TImage
       Left = 2
       Top = 2
-      Width = 21
-      Height = 21
+      Width = 16
+      Height = 16
       Align = alClient
       AutoSize = True
       Picture.Data = {
@@ -590,6 +612,8 @@ object frmOpDeclare: TfrmOpDeclare
       OnMouseMove = Image12MouseMove
       OnMouseUp = Image1MouseUp
       ExplicitLeft = -8
+      ExplicitWidth = 21
+      ExplicitHeight = 21
     end
   end
   object BitBtn6: TBitBtn
