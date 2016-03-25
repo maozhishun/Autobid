@@ -26,6 +26,8 @@ object frmMain: TfrmMain
       Caption = #25293#29260#20449#24687
       ExplicitLeft = 8
       ExplicitTop = 22
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Label5: TLabel
         Left = 13
         Top = 27
@@ -90,6 +92,10 @@ object frmMain: TfrmMain
     object tsHackIndex: TTabSheet
       Caption = #21327#35758#30772#35299
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         673
         168)

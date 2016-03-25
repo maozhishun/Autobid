@@ -3,7 +3,9 @@ program FakeCilent;
 uses
   Vcl.Forms,
   Unit1 in 'Unit1.pas' {Form1},
-  Unit2 in 'Unit2.pas' {Form2};
+  Unit2 in 'Unit2.pas' {Form2},
+  uOwnerDrawPanel in 'uOwnerDrawPanel.pas',
+  GdiPlus2009 in 'GdiPlus2009.pas';
 
 {$R *.res}
 

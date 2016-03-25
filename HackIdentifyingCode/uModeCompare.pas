@@ -42,7 +42,7 @@ type
   private
     FFileName: string;
     FFontName: string;
-    FFontSize: Integer;
+    FFontHeight: Integer;
     FFontStyles: TFontStyles;
     function CreateFontBitmap(AInt: Integer): IGPBitmap;
     function TrimBitmap(ASource: IGPBitmap): IGPBitmap;
@@ -54,11 +54,11 @@ type
   protected
     procedure InitMode; override;
   public
-    procedure SetFontMode(AFontName: string; AFontSize: Integer; AFontStyles: TFontStyles);
+    procedure SetFontMode(AFontName: string; AFontHeight: Integer; AFontStyles: TFontStyles);
     procedure AfterConstruction; override;
     function ScanMode(ASource: IGPBitmap): string;
     property FontName: string read FFontName;
-    property FontSize: Integer read FFontSize;
+    property FontHeight: Integer read FFontHeight;
     property FontStyles: TFontStyles read FFontStyles;
   end;
 
@@ -233,7 +233,7 @@ procedure TFontModeCompareMgr.AfterConstruction;
 begin
   FFileName := ExtractFileDir(Application.ExeName) + '\FontMode.ini';
   FFontName := 'ËÎÌו';
-  FFontSize := 11;
+  FFontHeight := -14;
   FFontStyles := [];
   LoadFromFile;
   inherited;
@@ -251,7 +251,7 @@ begin
   begin
     LBitmap := TBitmap.Create;
     LBitmap.Canvas.Font.Name := FFontName;
-    LBitmap.Canvas.Font.Size := FFontSize;
+    LBitmap.Canvas.Font.Height := FFontHeight;
     LBitmap.Canvas.Font.Style := FFontStyles;
     LBitmap.Canvas.Font.Color := clBlack;
     LBitmap.Width := LBitmap.Canvas.TextWidth(IntToStr(AInt));
@@ -326,8 +326,8 @@ begin
     LIniFile := TIniFile.Create(FFileName);
     FFontName :=
       LIniFile.ReadString('Values', 'FontName', FFontName);
-    FFontSize :=
-      LIniFile.ReadInteger('Values', 'FontSize', FFontSize);
+    FFontHeight :=
+      LIniFile.ReadInteger('Values', 'FontHeight', FFontHeight);
     FFontStyles :=
       IntToFontStyles(LIniFile.ReadInteger('Values', 'FontStyles', FontStylesToInt(FFontStyles)));
     LIniFile.Free;
@@ -358,7 +358,7 @@ var
 begin
   LIniFile := TIniFile.Create(FFileName);
   LIniFile.WriteString('Values', 'FontName', FFontName);
-  LIniFile.WriteInteger('Values', 'FontSize', FFontSize);
+  LIniFile.WriteInteger('Values', 'FontHeight', FFontHeight);
   LIniFile.WriteInteger('Values', 'FontStyles', FontStylesToInt(FFontStyles));
   LIniFile.Free;
 end;
@@ -421,10 +421,10 @@ begin
 end;
 
 procedure TFontModeCompareMgr.SetFontMode(AFontName: string;
-  AFontSize: Integer; AFontStyles: TFontStyles);
+  AFontHeight: Integer; AFontStyles: TFontStyles);
 begin
   FFontName := AFontName;
-  FFontSize := AFontSize;
+  FFontHeight := AFontHeight;
   FFontStyles := AFontStyles;
   UnInitMode;
   InitMode;

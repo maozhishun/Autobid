@@ -23,14 +23,14 @@ object Form1: TForm1
   end
   object Label2: TLabel
     Left = 98
-    Top = 91
-    Width = 40
-    Height = 15
+    Top = 94
+    Width = 35
+    Height = 14
     Caption = '82600'
     Font.Charset = GB2312_CHARSET
     Font.Color = clRed
-    Font.Height = -15
-    Font.Name = #26032#23435#20307
+    Font.Height = -14
+    Font.Name = #23435#20307
     Font.Style = []
     ParentFont = False
   end

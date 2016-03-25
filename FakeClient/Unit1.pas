@@ -5,9 +5,14 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Imaging.jpeg,
-  Vcl.ExtCtrls;
+  Vcl.ExtCtrls, uOwnerDrawPanel;
 
 type
+  TPricePanel = class(TOwnerDrawPanel)
+  protected
+    procedure OnPaint(ADC: HDC); override;
+  end;
+
   TForm1 = class(TForm)
     Button1: TButton;
     Edit1: TEdit;
@@ -21,8 +26,13 @@ type
     procedure Button2Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
   private
+    FPricePanel: TPricePanel;
+
     { Private declarations }
   public
+    procedure AfterConstruction; override;
+    procedure BeforeDestruction; override;
+
     { Public declarations }
   end;
 
@@ -32,9 +42,27 @@ var
 implementation
 
 uses
-  Unit2, System.DateUtils;
+  Unit2, System.DateUtils, GdiPlus2009;
 
 {$R *.dfm}
+
+procedure TForm1.AfterConstruction;
+begin
+  inherited;
+  FPricePanel := TPricePanel.Create(Self);
+  FPricePanel.Parent := Self;
+  FPricePanel.Left := 100;
+  FPricePanel.Top := 50;
+  FPricePanel.Width := 100;
+  FPricePanel.Height := 30;
+  FPricePanel.Caption := '82600';
+end;
+
+procedure TForm1.BeforeDestruction;
+begin
+  FPricePanel.Free;
+  inherited;
+end;
 
 procedure TForm1.Button1Click(Sender: TObject);
 var
@@ -61,8 +89,40 @@ begin
 end;
 
 procedure TForm1.Timer1Timer(Sender: TObject);
+var
+  LString: string;
 begin
-  Label2.Caption := IntToStr(80000 + SecondOf(Now) * 100);
+  LString := IntToStr(80000 + SecondOf(Now) * 100);
+  Label2.Caption := LString;
+  FPricePanel.Caption := LString;
+  FPricePanel.Refresh;
+end;
+
+{ TPricePanel }
+
+procedure TPricePanel.OnPaint(ADC: HDC);
+var
+  LGraphics: IGPGraphics;
+  LRect: TGPRect;
+  LBrush: IGPBrush;
+  LFont: IGPFont;
+  LPt: TGPPointF;
+begin
+  LGraphics := TGPGraphics.Create(ADC);
+
+  LRect := TGPRect.Create(0, 0, Width, Height);
+  LBrush := TGPSolidBrush.Create(TGPColor.CreateFromColorRef(clBtnFace));
+  LGraphics.FillRectangle(LBrush, LRect);
+
+  LFont := TGPFont.Create('ËÎÌו',14,[],UnitPixel);
+  LBrush := TGPSolidBrush.Create(TGPColor.CreateFromColorRef(clRed));
+  LPt := TGPPointF.Create(0,0);
+  LGraphics.DrawString(Self.Caption, LFont, LPt,
+    TGPStringFormat.GenericDefault, LBrush);
 end;
 
 end.
+
+{ TPricePanel }
+
+

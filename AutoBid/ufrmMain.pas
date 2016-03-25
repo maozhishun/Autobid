@@ -443,13 +443,13 @@ end;
 procedure TfrmMain.btnFontSettingsClick(Sender: TObject);
 begin
   FontDialog1.Font.Name := g_FontModeCompareMgr.FontName;
-  FontDialog1.Font.Size := g_FontModeCompareMgr.FontSize;
+  FontDialog1.Font.Height := g_FontModeCompareMgr.FontHeight;
   FontDialog1.Font.Style := g_FontModeCompareMgr.FontStyles;
   if FontDialog1.Execute(Self.Handle) then
   begin
     g_FontModeCompareMgr.SetFontMode(
       FontDialog1.Font.Name,
-      FontDialog1.Font.Size,
+      FontDialog1.Font.Height,
       FontDialog1.Font.Style);
   end;
 end;
