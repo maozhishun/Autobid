@@ -407,7 +407,7 @@ begin
 
       if not LIsCommit and g_StrategyManager.IsReadyCommit and
        (FStrategy.CommitAddPrice > 0) and (FStrategy.CommitPrice > 0) and
-       (FStrategy.CommitAddPrice + FStrategy.CommitPrice <= g_PriceInfoManager.LastPrice) then
+       (FStrategy.CommitAddPrice + FStrategy.CommitPrice - 300 <= g_PriceInfoManager.LastPrice) then
       begin
         LIsCommit := True;
         g_StrategyManager.Submit;
