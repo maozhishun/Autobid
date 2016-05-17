@@ -25,10 +25,12 @@ type
     FCommitTime: TDateTime;
     FCommitPrice: Integer;
     FCommitAddPrice: Integer;
+    FCommitLag: Integer;
     procedure SetStartTime(const Value: TDateTime);
     procedure SetCommitTime(const Value: TDateTime);
     procedure SetCommitPrice(const Value: Integer);
     procedure SetCommitAddPrice(const Value: Integer);
+    procedure SetCommitLag(const Value: Integer);
   protected
     function GetType: TStrategyType; override;
   public
@@ -38,6 +40,8 @@ type
 
     //实际提交价格，提交时填充
     property CommitPrice: Integer read FCommitPrice write SetCommitPrice;
+    //延时提交，在到达提交价格时后再延时的参数
+    property CommitLag: Integer read FCommitLag write SetCommitLag;
 
   end;
 
@@ -72,7 +76,7 @@ type
     procedure SetIsCopyMode(const Value: Boolean);
   public
     procedure InvokeStrategy(AStrategy: TBaseStrategy);
-    procedure Submit;
+    procedure Commit;
     procedure InputIndentifyCode(const ACode: string);
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
@@ -144,6 +148,11 @@ end;
 procedure TAutomaticStrategy.SetStartTime(const Value: TDateTime);
 begin
   FStartTime := Value;
+end;
+
+procedure TAutomaticStrategy.SetCommitLag(const Value: Integer);
+begin
+  FCommitLag := Value;
 end;
 
 { TBaseStrategy }
@@ -316,6 +325,7 @@ begin
           TAutomaticStrategy(LStrategy).CommitTime := LTime;
 
           TAutomaticStrategy(LStrategy).CommitAddPrice := LIniFile.ReadInteger(LSection, 'CommitAddPrice', 0);
+          TAutomaticStrategy(LStrategy).CommitLag := LIniFile.ReadInteger(LSection, 'SubmitLag', 0);
         end;
       stManual:
         begin
@@ -362,7 +372,7 @@ begin
   LIniFile.Free;
 end;
 
-procedure TStrategyManager.Submit;
+procedure TStrategyManager.Commit;
 begin
   MouseClick(g_ScreanPointSetting.GetSubmitPos);
   FAutoFillIndentifyCodeStatus := aficsCompleted;
@@ -402,7 +412,7 @@ begin
        (FStrategy.CommitTime <= Now) then
       begin
         LIsCommit := True;
-        g_StrategyManager.Submit;
+        g_StrategyManager.Commit;
       end;
 
       if not LIsCommit and g_StrategyManager.IsReadyCommit and
@@ -410,7 +420,9 @@ begin
        (FStrategy.CommitAddPrice + FStrategy.CommitPrice - 300 <= g_PriceInfoManager.LastPrice) then
       begin
         LIsCommit := True;
-        g_StrategyManager.Submit;
+        if (FStrategy.CommitAddPrice > 0) then
+          Sleep(FStrategy.CommitLag);
+        g_StrategyManager.Commit;
       end;
     end;
     Sleep(100);

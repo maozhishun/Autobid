@@ -557,7 +557,7 @@ begin
         case AKey of
           VK_RETURN: //Ctrl+Enter提交验证码
             begin
-              g_StrategyManager.Submit;
+              g_StrategyManager.Commit;
               AHandle := True;
             end;
         end;
@@ -566,7 +566,7 @@ begin
       case AKey of
         VK_RETURN: //Ctrl+Enter提交验证码
         begin
-          g_StrategyManager.Submit;
+          g_StrategyManager.Commit;
           AHandle := True;
         end;
       end;
