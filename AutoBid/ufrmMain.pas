@@ -576,12 +576,12 @@ begin
   if GetKeyState(VK_CONTROL) < 0 then
   begin
     case AKey of
-      VK_ADD:
+      VK_PRIOR:
         begin
           g_StrategyManager.IsReadyCommit := True;
           UpdateCommitStatus;
         end;
-      VK_SUBTRACT:
+      VK_NEXT:
         begin
           g_StrategyManager.IsReadyCommit := False;
           UpdateCommitStatus;
